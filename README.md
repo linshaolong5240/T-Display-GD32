@@ -1,17 +1,17 @@
 # T-Display-GD32
-T-Display-GD32
+T-Display-GD32 Hello World!
 
 # Mac RISCV 开发环境踩坑
 
-开发版买的LILYGO T-Display-GD32，调试器买的mini daplink。
+开发版买的LILYGO T-Display-GD32，调试器买的mini DAPLink。
 
 ## 安装RISCV工具链
-RISCV 工具链在Mac上提供homebrew安装方式，提供了Mac OS 13+ ARM64 预编译二进制，intel需要下载6.5自行编译。
+RISCV工具链在Mac上提供homebrew安装方式，提供了Mac OS 13+ ARM64 预编译二进制，intel需要下载6.5G自行编译。
 https://github.com/riscv-software-src/homebrew-riscv
 
 ## make 报错
 
-编译阶段报错
+编译阶段报错 
 ```
 Error: unrecognized opcode `csrrs a5,mstatus,8', extension `zicsr' required
 ```
