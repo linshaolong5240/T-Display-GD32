@@ -47,7 +47,7 @@ Error: wrong # args: should be "expr expression"
 #应该和TCL版本对应语法有关，expr 关键字后面表达式空格删掉：
     set dmcontrol_dmactive  [expr 1<<0]
 ```
-## 串口打印信息无法换行：
+## 串口打印信息无法换行
 各平台换行符：
 * unix: \n
 * macOS: \r
