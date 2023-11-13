@@ -12,7 +12,7 @@
 
 #define TIMER_CTRL_ADDR           0xd1000000
 #define TIMER_REG(offset)         _REG32(TIMER_CTRL_ADDR, offset)
-#define TIMER_FREQ                ((uint32_t)SystemCoreClock/4)
+#define TIMER_FREQ                ((uint32_t)108000000/4)
 
 #endif
 

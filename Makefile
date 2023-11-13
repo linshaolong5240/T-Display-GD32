@@ -2,28 +2,30 @@
 ######################################
 # Target
 ######################################
-TARGET = HelloWorld
+TARGET ?= HelloWorld
 
+GD32VF103_FIRMWARE_DIR = GD32VF103_Firmware_Library_V1.1.5
 
 ######################################
 # Source
 ######################################
 # C sources
 C_SOURCES =  \
-$(wildcard GD32VF103_Firmware_Library_V1.1.5/Firmware/GD32VF103_standard_peripheral/Source/*.c) \
-$(wildcard GD32VF103_Firmware_Library_V1.1.5/Firmware/GD32VF103_standard_peripheral/*.c) \
-$(wildcard GD32VF103_Firmware_Library_V1.1.5/Firmware/RISCV/drivers/*.c) \
-$(wildcard GD32VF103_Firmware_Library_V1.1.5/Firmware/RISCV/env_Eclipse/*.c) \
-$(wildcard GD32VF103_Firmware_Library_V1.1.5/Firmware/RISCV/stubs/*.c) \
+$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral/Source/*.c) \
+$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral/*.c) \
+$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/drivers/*.c) \
+$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/*.c) \
+$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/stubs/*.c) \
+$(wildcard SDK/*.c) \
 
 # add your c sources here
 C_SOURCES += \
-$(wildcard ./*.c) \
+$(wildcard Project/$(TARGET)/*.c) \
 
 # ASM sources
 ASM_SOURCES =  \
-GD32VF103_Firmware_Library_V1.1.5/Firmware/RISCV/env_Eclipse/start.s \
-GD32VF103_Firmware_Library_V1.1.5/Firmware/RISCV/env_Eclipse/entry.s \
+$(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/start.s \
+$(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/entry.s \
 
 
 ######################################
@@ -31,14 +33,15 @@ GD32VF103_Firmware_Library_V1.1.5/Firmware/RISCV/env_Eclipse/entry.s \
 ######################################
 # C includes
 C_INCLUDES =  \
--I GD32VF103_Firmware_Library_V1.1.5/Firmware/GD32VF103_standard_peripheral/Include \
--I GD32VF103_Firmware_Library_V1.1.5/Firmware/GD32VF103_standard_peripheral \
--I GD32VF103_Firmware_Library_V1.1.5/Firmware/RISCV/drivers \
--I GD32VF103_Firmware_Library_V1.1.5/Firmware/RISCV/stubs \
+-I $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral/Include \
+-I $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral \
+-I $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/drivers \
+-I $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/stubs \
+-I SDK \
 
 # add your includes here
 C_INCLUDES += \
--I . \
+-I Project/$(TARGET) \
 
 # AS includes
 AS_INCLUDES = 
@@ -72,7 +75,7 @@ AS_DEFS =
 # Linker
 #######################################
 # link script
-LDSCRIPT = GD32VF103_Firmware_Library_V1.1.5/Firmware/RISCV/env_Eclipse/GD32VF103xB.lds
+LDSCRIPT = $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/GD32VF103xB.lds
 
 
 #######################################

@@ -57,5 +57,8 @@ dkms.conf
 # SVN
 .svn
 
+# VSCode
+.vscode
+
 # build
 build/

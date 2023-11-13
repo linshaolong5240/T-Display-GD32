@@ -219,6 +219,11 @@ uint8_t eclic_get_cliccfg(void)
     return *(volatile uint8_t *)(ECLIC_ADDR_BASE + ECLIC_CFG_OFFSET);
 }
 
+uint32_t eclic_get_clicinfo(void)
+{
+    return *(volatile uint32_t *)(ECLIC_ADDR_BASE + ECLIC_INFO_OFFSET);
+}
+
 void eclic_set_mth(uint8_t mth)
 {
     *(volatile uint8_t *)(ECLIC_ADDR_BASE + ECLIC_MTH_OFFSET) = mth;
