@@ -181,14 +181,23 @@ _start0800:
     li t0, 0x200
     csrs CSR_MMISC_CTL, t0
 
-	/* Intial the mtvt*/
+    /* Intial the mtvt*/
+    /* mtvt 寄存器用于保存 ECLIC 中断向量表的基地址，此基地址至少为 64byte 对齐。 */
     la t0, vector_base
     csrw CSR_MTVT, t0
 
 	/* Intial the mtvt2 and enable it*/
+    /* 如果配置CSR 寄存器 mtvt2 的最低位为0（上电复位默认值），则所有非向量中断共享的
+    入口地址由CSR 寄存器 mtvec 的值（忽略最低 2 位的值）指定。由于 mtvec 寄存器的值
+    也指定异常的入口地址，因此，意味着在这种情况下，异常和所有非向量中断共享入口地 */
+
+    /*如果配置CSR 寄存器 mtvt2 的最低位为1，则所有非向量中断共享的入口地址由 CSR 寄
+    存器mtvt2 的值（忽略最低 2 位的值）指定。为了让中断以尽可能快的速度被响应和处理，
+    推荐将CSR 寄存器 mtvt2 的最低位设置为 1，即，由mtvt2 指定一个独立的入口地址供所
+    有非向量中断专用，和异常的入口地址（由 mtvec 的值指定）彻底分开。*/
     la t0, irq_entry
     csrw CSR_MTVT2, t0
-    csrs CSR_MTVT2, 0x1
+    csrs CSR_MTVT2, 0x1 /* 非向量中断入口 与 异常入口分开 */
 
     /* Intial the CSR MTVEC for the Trap and NMI base addr*/
     la t0, trap_entry

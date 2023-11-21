@@ -1,7 +1,5 @@
 #include "ECLICInfo.h"
-
 #include <stdio.h>
-
 #include "n200_func.h"
 
 ECLICInfo MakeECLICInfo(uint32_t value)
