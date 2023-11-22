@@ -5,8 +5,10 @@
 ######################################
 TARGET ?= HelloWorld
 
-GD32VF103_FIRMWARE_DIR = GD32VF103_Firmware_Library_V1.1.5
+OS ?= None
 
+GD32VF103_FIRMWARE_DIR = GD32VF103_Firmware_Library_V1.1.5
+FREERTOS_DIR = OS/FreeRTOS-KernelV10.6.1
 ######################################
 # Source
 ######################################
@@ -19,15 +21,28 @@ $(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/*.c) \
 $(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/stubs/*.c) \
 $(wildcard SDK/*.c) \
 
+ifeq ($(OS), FreeRTOS)
+C_SOURCES += \
+$(wildcard $(FREERTOS_DIR)/*.c) \
+$(wildcard $(FREERTOS_DIR)/portable/MemMang/*.c) \
+$(wildcard $(FREERTOS_DIR)/portable/GCC/RISC-V/*.c)
+endif
+
 # add your c sources here
 C_SOURCES += \
 $(wildcard Project/$(TARGET)/*.c) \
 
 # ASM sources
+
+ifeq ($(OS), FreeRTOS)
+ASM_SOURCES += \
+$(FREERTOS_DIR)/start.s \
+$(FREERTOS_DIR)/portable/GCC/RISC-V/portASM.s
+else
 ASM_SOURCES =  \
 $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/start.s \
-$(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/entry.s \
-
+$(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/entry.s
+endif
 
 ######################################
 # Includes
@@ -39,6 +54,13 @@ C_INCLUDES =  \
 -I $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/drivers \
 -I $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/stubs \
 -I SDK \
+
+ifeq ($(OS), FreeRTOS)
+C_INCLUDES += \
+-I $(FREERTOS_DIR)/include \
+-I $(FREERTOS_DIR)/portable/GCC/RISC-V \
+-I $(FREERTOS_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RISCV_MTIME_CLINT_no_extensions
+endif
 
 # add your includes here
 C_INCLUDES += \

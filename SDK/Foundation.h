@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <sys/types.h>
 #include <stdio.h>
+#include "rtprint.h"
 
 #define ON      1
 #define OFF     0
