@@ -57,6 +57,7 @@ C_INCLUDES =  \
 
 ifeq ($(OS), FreeRTOS)
 C_INCLUDES += \
+-I $(FREERTOS_DIR) \
 -I $(FREERTOS_DIR)/include \
 -I $(FREERTOS_DIR)/portable/GCC/RISC-V \
 -I $(FREERTOS_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RISCV_MTIME_CLINT_no_extensions

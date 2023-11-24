@@ -6,5 +6,5 @@ make clean
 # make TARGET=MachineTimer
 
 # FreeRTOS
-make TARGET=FreeRTOSTemplate OS=FreeRTOS
-# make TARGET=FreeRTOSTemplate OS=FreeRTOS flash
+# make TARGET=FreeRTOSTemplate OS=FreeRTOS
+make TARGET=FreeRTOSTask OS=FreeRTOS flash
