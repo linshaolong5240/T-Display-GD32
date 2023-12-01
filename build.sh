@@ -7,4 +7,6 @@ make clean
 
 # FreeRTOS
 # make TARGET=FreeRTOSTemplate OS=FreeRTOS
-make TARGET=FreeRTOSTask OS=FreeRTOS flash
+# make TARGET=FreeRTOSTask OS=FreeRTOS flash
+# make TARGET=FreeRTOSQueue OS=FreeRTOS flash
+make TARGET=FreeRTOSQueue OS=FreeRTOS
