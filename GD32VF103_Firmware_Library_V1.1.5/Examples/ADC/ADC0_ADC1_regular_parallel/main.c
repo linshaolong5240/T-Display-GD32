@@ -67,7 +67,7 @@ int main(void)
     adc_config();
 
     /* enable TIMER1 */
-    timer_enable(TIMER1);
+    // timer_enable(TIMER1);
   
     while(1){ 
     }

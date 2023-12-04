@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include <sys/types.h>
 #include <stdio.h>
+
+#include "gd32vf103_libopt.h"
 #include "rtprint.h"
 
 #define ON      1
