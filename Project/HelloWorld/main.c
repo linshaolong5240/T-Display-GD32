@@ -20,9 +20,9 @@ int main(void)
 
     while (1) {
         printf("hello, world\r\n");
-        LEDToggle(LED_R);
-        LEDToggle(LED_G);
-        LEDToggle(LED_B);
+        LEDToggle(LED_RED);
+        LEDToggle(LED_GREEN);
+        LEDToggle(LED_BLUE);
         delay(500);
     }
 

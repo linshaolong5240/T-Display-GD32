@@ -7,9 +7,9 @@
 #include "Foundation.h"
 
 typedef enum {
-    LED_R,
-    LED_G,
-    LED_B,
+    LED_RED,
+    LED_GREEN,
+    LED_BLUE,
 } LED;
 
 void LEDInit(void);

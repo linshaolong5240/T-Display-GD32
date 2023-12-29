@@ -35,13 +35,13 @@ void LEDControl(LED led, bool enable)
 {
     switch (led)
     {
-    case LED_R:
+    case LED_RED:
         gpio_bit_write(LED_R_GPIO, LED_R_PIN, enable ? LED_R_ACTIVE : LED_R_DEACTIVE);
         break;
-    case LED_G:
+    case LED_GREEN:
         gpio_bit_write(LED_G_GPIO, LED_G_PIN, enable ? LED_G_ACTIVE : LED_G_DEACTIVE);
         break;
-    case LED_B:
+    case LED_BLUE:
         gpio_bit_write(LED_B_GPIO, LED_B_PIN, enable ? LED_B_ACTIVE : LED_B_DEACTIVE);
         break;
     }
@@ -51,13 +51,13 @@ void LEDToggle(LED led)
 {
     switch (led)
     {
-    case LED_R:
+    case LED_RED:
         gpio_bit_write(LED_R_GPIO, LED_R_PIN, gpio_input_bit_get(LED_R_GPIO, LED_R_PIN) == LED_R_ACTIVE ? LED_R_DEACTIVE : LED_R_ACTIVE);
         break;
-    case LED_G:
+    case LED_GREEN:
         gpio_bit_write(LED_G_GPIO, LED_G_PIN, gpio_input_bit_get(LED_G_GPIO, LED_G_PIN) == LED_G_ACTIVE ? LED_G_DEACTIVE : LED_G_ACTIVE);
         break;
-    case LED_B:
+    case LED_BLUE:
         gpio_bit_write(LED_B_GPIO, LED_B_PIN, gpio_input_bit_get(LED_B_GPIO, LED_B_PIN) == LED_B_ACTIVE ? LED_B_DEACTIVE : LED_B_ACTIVE);
         break;
     }

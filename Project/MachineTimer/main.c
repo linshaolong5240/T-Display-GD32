@@ -42,7 +42,7 @@ int main(void)
     {
         if (tickCountChanged)
         {
-            LEDToggle(LED_R);
+            LEDToggle(LED_RED);
             tickCountChanged = false;
             printf("tickCount %d\n", tickCount);
         }

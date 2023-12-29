@@ -6,7 +6,7 @@
 #include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
+#include "semphr.h"
 
 typedef struct
 {
@@ -17,7 +17,7 @@ TaskHandle_t taskA = NULL;
 TaskHandle_t taskB = NULL;
 TaskHandle_t taskC = NULL;
 
-QueueHandle_t taskAMessageQueue = NULL;
+SemaphoreHandle_t semaphoreMutex = NULL;
 
 // 系统初始化函数使用标准工具链时没有在main函数前调用,声明后手动调用
 extern void _init();
@@ -25,7 +25,6 @@ extern void _init();
 void TaskCreate(void);
 void TaskA(void *parameters);
 void TaskB(void *parameters);
-void TaskC(void *parameters);
 
 void IRQConfigure(void)
 {
@@ -42,6 +41,20 @@ int main(void)
     USARTInit();
     LEDInit();
 
+    semaphoreMutex = xSemaphoreCreateMutex();
+    if (semaphoreMutex != NULL)
+    {
+#if DEBUG
+        rtprintf("Semaphore create Succeed\r\n");
+#endif
+    }
+    else
+    {
+#if DEBUG
+        rtprintf("Semaphore create Failed\r\n");
+#endif
+    }
+
     TaskCreate();
     vTaskStartScheduler();
 
@@ -56,28 +69,38 @@ void TaskCreate(void)
 {
     xTaskCreate(TaskA, "TaskA", 256, NULL, 3, &taskA);
     xTaskCreate(TaskB, "TaskB", 256, NULL, 3, &taskB);
-    xTaskCreate(TaskC, "TaskC", 256, NULL, 3, &taskB);
 }
 
 void TaskA(void *parameters)
 {
-    Message message;
-    taskAMessageQueue = xQueueCreate(10, sizeof(Message));
     while (1)
     {
-        if (taskAMessageQueue != NULL)
+        if (semaphoreMutex != NULL)
         {
-            if (xQueueReceive(taskAMessageQueue, &message, portMAX_DELAY) == pdTRUE)
+            if (xQueueSemaphoreTake(semaphoreMutex, portMAX_DELAY) == pdTRUE)
             {
 #if DEBUG
-                rtprintf("TaskA receive message succeed, value = %d\r\n", message.value);
+                rtprintf("TaskA semaphore take succeed\r\n");
 #endif
                 LEDToggle(LED_RED);
+                if (xSemaphoreGive(semaphoreMutex) == pdPASS)
+                {
+#if DEBUG
+                    rtprintf("TaskA semaphore give succeed\r\n");
+#endif
+                    vTaskDelay(100);
+                }
+                else
+                {
+#if DEBUG
+                    rtprintf("TaskA semaphore give failed");
+#endif
+                }
             }
             else
             {
 #if DEBUG
-                rtprintf("TaskA receive message failed");
+                rtprintf("TaskA semaphore take failed\r\n");
 #endif
             }
         }
@@ -86,50 +109,34 @@ void TaskA(void *parameters)
 
 void TaskB(void *parameters)
 {
-    Message message = { 1 };
-
     while (1)
     {
-        if (taskAMessageQueue != NULL)
+        if (semaphoreMutex != NULL)
         {
-            if (xQueueSend(taskAMessageQueue, &message, portMAX_DELAY) == pdTRUE)
+            if (xQueueSemaphoreTake(semaphoreMutex, portMAX_DELAY) == pdTRUE)
             {
 #if DEBUG
-                rtprintf("TaskB send message succeed, value = %d\r\n", message.value);
+                rtprintf("TaskB semaphore take succeed\r\n");
 #endif
                 LEDToggle(LED_GREEN);
+                if (xSemaphoreGive(semaphoreMutex) == pdPASS)
+                {
+#if DEBUG
+                    rtprintf("TaskB semaphore give succeed\r\n");
+#endif
                 vTaskDelay(1000);
+                }
+                else
+                {
+#if DEBUG
+                    rtprintf("TaskB semaphore give failed");
+#endif
+                }
             }
             else
             {
 #if DEBUG
-                rtprintf("TaskB send message failed");
-#endif
-            }
-        }
-    }
-}
-
-void TaskC(void *parameters)
-{
-    Message message = { 2 };
-
-    while (1)
-    {
-        if (taskAMessageQueue != NULL)
-        {
-            if (xQueueSend(taskAMessageQueue, &message, portMAX_DELAY) == pdTRUE)
-            {
-#if DEBUG
-                rtprintf("TaskC send message succeed, value = %d\r\n", message.value);
-#endif
-                LEDToggle(LED_GREEN);
-                vTaskDelay(1000);
-            }
-            else
-            {
-#if DEBUG
-                rtprintf("TaskC send message failed");
+                rtprintf("TaskB semaphore take failed\r\n");
 #endif
             }
         }

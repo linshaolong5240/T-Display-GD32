@@ -1,14 +1,25 @@
 #!/bin/sh
+MAKE_OPTION=-j
+
+FLASH=flash
+OS=FreeRTOS
 
 make clean
 
-# make TARGET=HelloWorld
-# make TARGET=MachineTimer
-# make TARGET=ADC0 flash
-# make TARGET=ADC-Temperature flash
+# TARGET
+#
+# TARGET=HelloWorld
+# TARGET=MachineTimer
+# TARGET=ADC0
+# TARGET=ADC0-Temperature
 
-# FreeRTOS
-# make TARGET=FreeRTOSTemplate OS=FreeRTOS
-# make TARGET=FreeRTOSTask OS=FreeRTOS flash
-make TARGET=FreeRTOSQueue OS=FreeRTOS flash
-# make TARGET=FreeRTOSQueue OS=FreeRTOS
+# FreeRTOS TARGET
+#
+# TARGET=FreeRTOSTemplate
+# TARGET=FreeRTOSTask
+# TARGET=FreeRTOSQueue
+# TARGET=FreeRTOSSemaphoreBinary
+TARGET=FreeRTOSSemaphoreCounting
+# TARGET=FreeRTOSSemaphoreMutex
+
+make $MAKE_OPTION TARGET=$TARGET OS=$OS $FLASH

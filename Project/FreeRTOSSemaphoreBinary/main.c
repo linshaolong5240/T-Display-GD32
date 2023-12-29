@@ -6,7 +6,7 @@
 #include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
+#include "semphr.h"
 
 typedef struct
 {
@@ -17,7 +17,7 @@ TaskHandle_t taskA = NULL;
 TaskHandle_t taskB = NULL;
 TaskHandle_t taskC = NULL;
 
-QueueHandle_t taskAMessageQueue = NULL;
+SemaphoreHandle_t semaphoreBinary = NULL;
 
 // 系统初始化函数使用标准工具链时没有在main函数前调用,声明后手动调用
 extern void _init();
@@ -42,6 +42,20 @@ int main(void)
     USARTInit();
     LEDInit();
 
+    semaphoreBinary = xSemaphoreCreateBinary();
+    if (semaphoreBinary != NULL)
+    {
+#if DEBUG
+        rtprintf("Semaphore create Succeed\r\n");
+#endif
+    }
+    else
+    {
+#if DEBUG
+        rtprintf("Semaphore create Failed\r\n");
+#endif
+    }
+
     TaskCreate();
     vTaskStartScheduler();
 
@@ -61,23 +75,21 @@ void TaskCreate(void)
 
 void TaskA(void *parameters)
 {
-    Message message;
-    taskAMessageQueue = xQueueCreate(10, sizeof(Message));
     while (1)
     {
-        if (taskAMessageQueue != NULL)
+        if (semaphoreBinary != NULL)
         {
-            if (xQueueReceive(taskAMessageQueue, &message, portMAX_DELAY) == pdTRUE)
+            if (xQueueSemaphoreTake(semaphoreBinary, portMAX_DELAY) == pdTRUE)
             {
 #if DEBUG
-                rtprintf("TaskA receive message succeed, value = %d\r\n", message.value);
+                rtprintf("TaskA semaphore take succeed\r\n");
 #endif
                 LEDToggle(LED_RED);
             }
             else
             {
 #if DEBUG
-                rtprintf("TaskA receive message failed");
+                rtprintf("TaskA semaphore take failed\r\n");
 #endif
             }
         }
@@ -86,24 +98,21 @@ void TaskA(void *parameters)
 
 void TaskB(void *parameters)
 {
-    Message message = { 1 };
-
     while (1)
     {
-        if (taskAMessageQueue != NULL)
+        if (semaphoreBinary != NULL)
         {
-            if (xQueueSend(taskAMessageQueue, &message, portMAX_DELAY) == pdTRUE)
+            if (xQueueSemaphoreTake(semaphoreBinary, portMAX_DELAY) == pdTRUE)
             {
 #if DEBUG
-                rtprintf("TaskB send message succeed, value = %d\r\n", message.value);
+                rtprintf("TaskB semaphore take succeed\r\n");
 #endif
                 LEDToggle(LED_GREEN);
-                vTaskDelay(1000);
             }
             else
             {
 #if DEBUG
-                rtprintf("TaskB send message failed");
+                rtprintf("TaskB semaphore take failed\r\n");
 #endif
             }
         }
@@ -112,27 +121,21 @@ void TaskB(void *parameters)
 
 void TaskC(void *parameters)
 {
-    Message message = { 2 };
-
     while (1)
     {
-        if (taskAMessageQueue != NULL)
+        if (xSemaphoreGive(semaphoreBinary) == pdPASS)
         {
-            if (xQueueSend(taskAMessageQueue, &message, portMAX_DELAY) == pdTRUE)
-            {
 #if DEBUG
-                rtprintf("TaskC send message succeed, value = %d\r\n", message.value);
+            rtprintf("TaskC semaphore give succeed\r\n");
 #endif
-                LEDToggle(LED_GREEN);
-                vTaskDelay(1000);
-            }
-            else
-            {
-#if DEBUG
-                rtprintf("TaskC send message failed");
-#endif
-            }
         }
+        else
+        {
+#if DEBUG
+            rtprintf("TaskC semaphore give failed");
+#endif
+        }
+        vTaskDelay(1000);
     }
 }
 
