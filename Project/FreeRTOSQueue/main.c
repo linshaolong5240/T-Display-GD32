@@ -13,6 +13,11 @@ typedef struct
     int value;
 } Message;
 
+TaskHandle_t taskA = NULL;
+TaskHandle_t taskB = NULL;
+
+QueueHandle_t taskAMessageQueue = NULL;
+
 // 系统初始化函数使用标准工具链时没有在main函数前调用,声明后手动调用
 extern void _init();
 
@@ -20,14 +25,9 @@ void TaskCreate(void);
 void TaskA(void *parameters);
 void TaskB(void *parameters);
 
-TaskHandle_t taskA = NULL;
-TaskHandle_t taskB = NULL;
-
-QueueHandle_t taskAMessageQueue = NULL;
-
 void IRQConfigure(void)
 {
-    eclic_priority_group_set(ECLIC_PRIGROUP_LEVEL4_PRIO0); // 四位优先级组全配置为lvl
+    eclic_priority_group_set(ECLIC_PRIGROUP_LEVEL4_PRIO0); // 4 bits for level, 0 bits for priority
     eclic_global_interrupt_enable();                       // 使能全局中断
 }
 
