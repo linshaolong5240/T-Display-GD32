@@ -7,11 +7,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define debugprint rtprintf
-#define DEBUG 1
-#define HOOK_DEBUG 0
-#define DEBUG_TASK 1
-
 // 系统初始化函数使用标准工具链时没有在main函数前调用,声明后手动调用
 extern void _init();
 
@@ -224,21 +219,21 @@ void vApplicationIdleHook(void)
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 {
-#if HOOK_DEBUG
+#if DEBUG_HOOK
     debugprint("task：%s Overflow\r\n", pcTaskName);
 #endif
 }
 
 void vApplicationMallocFailedHook(void)
 {
-#if HOOK_DEBUG
+#if DEBUG_HOOK
     debugprint("MallocFailed\r\n");
 #endif
 }
 
 void vApplicationDaemonTaskStartupHook(void)
 {
-#if HOOK_DEBUG
+#if DEBUG_HOOK
     debugprint("DaemonTask\r\n");
 #endif
 }

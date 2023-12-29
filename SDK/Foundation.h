@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <stdio.h>
 
+#include "DEBUGConfig.h"
+
 #include "gd32vf103_libopt.h"
 #include "rtprint.h"
 

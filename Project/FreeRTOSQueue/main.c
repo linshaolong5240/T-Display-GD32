@@ -8,11 +8,6 @@
 #include "task.h"
 #include "queue.h"
 
-#define debugprint rtprintf
-#define DEBUG 1
-#define HOOK_DEBUG 0
-#define DEBUG_TASK 1
-
 // 系统初始化函数使用标准工具链时没有在main函数前调用,声明后手动调用
 extern void _init();
 
@@ -20,14 +15,10 @@ void TaskCreate(void);
 void TaskCreater(void *parameters);
 void TaskA(void *parameters);
 void TaskB(void *parameters);
-void TaskC(void *parameters);
-void TaskD(void *parameters);
 
 TaskHandle_t taskCreater = NULL;
 TaskHandle_t taskA = NULL;
 TaskHandle_t taskB = NULL;
-TaskHandle_t taskC = NULL;
-TaskHandle_t taskD = NULL;
 
 typedef struct
 {
@@ -58,18 +49,18 @@ int main(void)
     LEDInit();
 
 #if DEBUG
-    debugprint("1\r\n");
+    rtprintf("1\r\n");
 #endif
     TaskCreate();
     // xTaskCreate(TaskCreater, "TaskCreater", 256, NULL, 2, &taskCreater);
 #if DEBUG
-    debugprint("2\r\n");
+    rtprintf("2\r\n");
 #endif
     vTaskStartScheduler();
 #if DEBUG
     while (1)
     {
-        debugprint("RTOS Exit\r\n");
+        rtprintf("RTOS Exit\r\n");
     }
 #endif
 }
@@ -87,34 +78,14 @@ void TaskCreate(void)
     size_t size = 0;
     size = xPortGetFreeHeapSize();
 #if DEBUG
-    debugprint("tc1 size %d\r\n", size);
+    rtprintf("tc1 size %d\r\n", size);
 #endif
     xTaskCreate(TaskA, "TaskA", 256, NULL, 3, &taskA);
     size = xPortGetFreeHeapSize();
 #if DEBUG
-    debugprint("tc2 size %d\r\n", size);
+    rtprintf("tc2 size %d\r\n", size);
 #endif
     xTaskCreate(TaskB, "TaskB", 256, NULL, 3, &taskB);
-//     size = xPortGetFreeHeapSize();
-// #if DEBUG
-//     debugprint("tc3 size %d\r\n", size);
-// #endif
-//     xTaskCreate(TaskC, "TaskC", 256, NULL, 3, &taskC);
-//     size = xPortGetFreeHeapSize();
-// #if DEBUG
-//     debugprint("tc4 size %d\r\n", size);
-// #endif
-//     xTaskCreate(TaskD, "TaskD", 256, NULL, 2, &taskD);
-//     size = xPortGetFreeHeapSize();
-// #if DEBUG
-//     debugprint("tc5 size %d\r\n", size);
-// #endif
-// #if DEBUG
-//     debugprint("A=%x\r\n", taskA);
-//     debugprint("B=%x\r\n", taskB);
-//     debugprint("C=%x\r\n", taskC);
-//     debugprint("D=%x\r\n", taskD);
-// #endif
 }
 
 void TaskCreater(void *parameters)
@@ -122,8 +93,6 @@ void TaskCreater(void *parameters)
     taskENTER_CRITICAL();
     xTaskCreate(TaskA, "TaskA", 256, NULL, 2, &taskA);
     xTaskCreate(TaskB, "TaskB", 256, NULL, 2, &taskB);
-    xTaskCreate(TaskC, "TaskC", 256, NULL, 2, &taskC);
-    xTaskCreate(TaskD, "TaskD", 256, NULL, 2, &taskD);
     taskEXIT_CRITICAL();
     vTaskDelete(taskCreater);
 }
@@ -131,28 +100,18 @@ void TaskCreater(void *parameters)
 void TaskA(void *parameters)
 {
     Message message;
-    size_t size = 0;
-    UBaseType_t mark = 0;
     taskAMessageQueue = xQueueCreate(10, sizeof(Message));
     while (1)
     {
-#if DEBUG
-        taskENTER_CRITICAL();
-        debugprint("TaskA\r\n");
-        // size = xPortGetFreeHeapSize();
-        // debugprint("ta size %d\r\n", size);
-        // mark = uxTaskGetStackHighWaterMark(taskA);
-        // debugprint("mark %d\r\n", mark);
-        taskEXIT_CRITICAL();
-#endif
+
         if (taskAMessageQueue != NULL)
         {
             if (xQueueReceive(taskAMessageQueue, &message, portMAX_DELAY) == pdTRUE)
             {
-                if (message.value == 1)
-                {
-                    LEDToggle(LED_R);
-                }
+#if DEBUG
+                rtprintf("TaskA receive message succeed, value = %d\r\n", message.value);
+#endif
+                LEDToggle(LED_R);
             }
         }
     }
@@ -160,80 +119,41 @@ void TaskA(void *parameters)
 
 void TaskB(void *parameters)
 {
+    Message message = { 0 };
+
     while (1)
     {
-#if DEBUG
-        taskENTER_CRITICAL();
-        rtprintf("TaskB\r\n");
-        taskEXIT_CRITICAL();
-#endif
         if (taskAMessageQueue != NULL)
         {
-            Message message = {1};
+            message.value++;
             if (xQueueSend(taskAMessageQueue, &message, portMAX_DELAY) == pdTRUE)
             {
+#if DEBUG
+                rtprintf("TaskB send message succeed, value = %d\r\n", message.value);
+#endif
                 LEDToggle(LED_G);
                 vTaskDelay(1000);
+            }
+            else
+            {
             }
         }
     }
 }
 
-void TaskC(void *parameters)
-{
-    while (1)
-    {
-#if DEBUG
-        taskENTER_CRITICAL();
-        debugprint("TaskC\r\n");
-        taskEXIT_CRITICAL();
-#endif
-        LEDToggle(LED_B);
-        vTaskDelay(1500);
-    }
-}
-
-void TaskD(void *parameters)
-{
-    size_t size = 0;
-    configSTACK_DEPTH_TYPE mark = 0;
-    while (1)
-    {
-#if DEBUG
-        taskENTER_CRITICAL();
-        debugprint("TaskD\r\n");
-        size = xPortGetFreeHeapSize();
-        debugprint("FreeHeapSize %d\r\n", size);
-        mark = uxTaskGetStackHighWaterMark2(taskD);
-        debugprint("StackHighWaterMark %d\r\n", mark);
-        taskEXIT_CRITICAL();
-#endif
-        vTaskDelay(1000);
-    }
-}
-
 void freertos_risc_v_application_exception_handler(UBaseType_t mcause)
 {
-    UBaseType_t status = 0;
-
-    status = taskENTER_CRITICAL_FROM_ISR();
-    debugprint("exception: 0x%04x\r\n", mcause);
-    taskEXIT_CRITICAL_FROM_ISR(status);
-    // write(1, "trap\n", 5);
-    // printf("In trap handler, the mcause is %d\n", mcause);
-    // printf("In trap handler, the mepc is 0x%x\n", read_csr(mepc));
-    // printf("In trap handler, the mtval is 0x%x\n", read_csr(mbadaddr));
+    // rtprintfISR("exception: 0x%04x\r\n", mcause);
+    // rtprintfISR("In trap handler, the mcause is %d\n", mcause);
+    // rtprintfISR("In trap handler, the mepc is 0x%x\n", read_csr(mepc));
+    // rtprintfISR("In trap handler, the mtval is 0x%x\n", read_csr(mbadaddr));
     // _exit(mcause);
-    // return 0;
+    return 0;
 }
 
 void freertos_risc_v_application_interrupt_handler(UBaseType_t mcause)
 {
-    UBaseType_t status = 0;
-
-    status = taskENTER_CRITICAL_FROM_ISR();
-    debugprint("interrupt: 0x%04x\r\n", mcause);
-    taskEXIT_CRITICAL_FROM_ISR(status);
+    rtprintfISR("interrupt: 0x%04x\r\n", mcause);
 }
 
 void vApplicationTickHook(void)
@@ -248,21 +168,21 @@ void vApplicationIdleHook(void)
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 {
-#if HOOK_DEBUG
-    debugprint("task：%s Overflow\r\n", pcTaskName);
+#if DEBUG_HOOK
+    rtprintf("task：%s Overflow\r\n", pcTaskName);
 #endif
 }
 
 void vApplicationMallocFailedHook(void)
 {
-#if HOOK_DEBUG
-    debugprint("MallocFailed\r\n");
+#if DEBUG_HOOK
+    rtprintf("MallocFailed\r\n");
 #endif
 }
 
 void vApplicationDaemonTaskStartupHook(void)
 {
-#if HOOK_DEBUG
-    debugprint("DaemonTask\r\n");
+#if DEBUG_HOOK
+    rtprintf("DaemonTask\r\n");
 #endif
 }
