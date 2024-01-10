@@ -5,34 +5,25 @@
 ######################################
 TARGET ?= HelloWorld
 
-OS ?= None
+OS = 
 
-GD32VF103_FIRMWARE_DIR = GD32VF103_Firmware_Library_V1.1.5
-FREERTOS_DIR = OS/FreeRTOS-KernelV10.6.1
+SDK_DIR = SDK
+GD32VF103_FIRMWARE_DIR = $(SDK_DIR)/GD32VF103_Firmware_Library_V1.1.5
+OSD_DIR = $(SDK_DIR)/OS
+FREERTOS_DIR = $(SDK_DIR)/OS/FreeRTOS-KernelV10.6.1
+PROJECT_DIR = Project
+
 ######################################
-# Source
+# Source Files
 ######################################
-# C sources
-C_SOURCES =  \
-$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral/Source/*.c) \
-$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral/*.c) \
-$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/drivers/*.c) \
-$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/*.c) \
-$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/stubs/*.c) \
-$(wildcard SDK/*.c) \
 
-ifeq ($(OS), FreeRTOS)
-C_SOURCES += \
-$(wildcard $(FREERTOS_DIR)/*.c) \
-$(wildcard $(FREERTOS_DIR)/portable/MemMang/*.c) \
-$(wildcard $(FREERTOS_DIR)/portable/GCC/RISC-V/*.c)
-endif
+# ASM
+AS_INCLUDES =
+ASM_SOURCES =
 
-# add your c sources here
-C_SOURCES += \
-$(wildcard Project/$(TARGET)/*.c) \
-
-# ASM sources
+# C
+C_INCLUDES =
+C_SOURCES =
 
 ifeq ($(OS), FreeRTOS)
 ASM_SOURCES += \
@@ -44,16 +35,30 @@ $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/start.s \
 $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/entry.s
 endif
 
-######################################
-# Includes
-######################################
-# C includes
-C_INCLUDES =  \
+# GD32 Libaray
+C_INCLUDES +=  \
 -I $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral/Include \
 -I $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral \
 -I $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/drivers \
 -I $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/stubs \
 -I SDK \
+
+C_SOURCES =  \
+$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral/Source/*.c) \
+$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral/*.c) \
+$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/drivers/*.c) \
+$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/*.c) \
+$(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/stubs/*.c) \
+$(wildcard SDK/*.c) \
+
+# OS
+
+ifdef OS
+C_INCLUDES += \
+-I $(OSD_DIR)
+C_SOURCES += \
+$(OSD_DIR)
+endif
 
 ifeq ($(OS), FreeRTOS)
 C_INCLUDES += \
@@ -61,14 +66,17 @@ C_INCLUDES += \
 -I $(FREERTOS_DIR)/include \
 -I $(FREERTOS_DIR)/portable/GCC/RISC-V \
 -I $(FREERTOS_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RISCV_MTIME_CLINT_no_extensions
+C_SOURCES += \
+$(wildcard $(FREERTOS_DIR)/*.c) \
+$(wildcard $(FREERTOS_DIR)/portable/MemMang/*.c) \
+$(wildcard $(FREERTOS_DIR)/portable/GCC/RISC-V/*.c)
 endif
 
-# add your includes here
+# Project
 C_INCLUDES += \
--I Project/$(TARGET) \
-
-# AS includes
-AS_INCLUDES = 
+-I $(PROJECT_DIR)/$(TARGET)
+C_SOURCES += \
+$(wildcard $(PROJECT_DIR)/$(TARGET)/*.c) \
 
 
 ######################################

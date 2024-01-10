@@ -214,7 +214,7 @@ int snprintf(char *buf, unsigned int count, const char *format, ...)
 	return print(&buf, format, args);
 }
 
-void rtprintf(const char *format, ...)
+void tsprintf(const char *format, ...)
 {
 	va_list args;
 	taskENTER_CRITICAL();
@@ -223,7 +223,7 @@ void rtprintf(const char *format, ...)
 	taskEXIT_CRITICAL();
 }
 
-void rtprintfISR(const char *format, ...)
+void tsprintfisr(const char *format, ...)
 {
 	va_list args;
 	UBaseType_t status = 0;

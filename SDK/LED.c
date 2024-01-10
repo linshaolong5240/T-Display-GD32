@@ -22,13 +22,15 @@ void LEDInit(void)
     /* LED R:PC13 G:PA1 B:PA2 低电平有效 */
     rcu_periph_clock_enable(RCU_GPIOA);
     rcu_periph_clock_enable(RCU_GPIOC);
-    gpio_init(LED_R_GPIO, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_R_PIN);
-    gpio_init(LED_G_GPIO, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_G_PIN);
-    gpio_init(LED_B_GPIO, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_B_PIN);
 
     gpio_bit_write(LED_R_GPIO, LED_R_PIN, LED_R_DEACTIVE);
     gpio_bit_write(LED_G_GPIO, LED_G_PIN, LED_G_DEACTIVE);
     gpio_bit_write(LED_B_GPIO, LED_B_PIN, LED_B_DEACTIVE);
+    
+    gpio_init(LED_R_GPIO, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_R_PIN);
+    gpio_init(LED_G_GPIO, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_G_PIN);
+    gpio_init(LED_B_GPIO, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, LED_B_PIN);
+
 }
 
 void LEDControl(LED led, bool enable)

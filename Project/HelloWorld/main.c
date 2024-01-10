@@ -18,14 +18,14 @@ int main(void)
     USARTInit();
     LEDInit();
 
-    while (1) {
+    while (1)
+    {
         printf("hello, world\r\n");
         LEDToggle(LED_RED);
         LEDToggle(LED_GREEN);
         LEDToggle(LED_BLUE);
         delay(500);
     }
-
 }
 
 /* retarget the C library printf function to the USART */

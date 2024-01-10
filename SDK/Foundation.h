@@ -4,19 +4,20 @@
  extern "C" {
 #endif 
 
-#include <stdbool.h>
 #include <sys/types.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
 
-#include "DEBUGConfig.h"
-
 #include "gd32vf103_libopt.h"
-#include "rtprint.h"
+
+#include "DEBUGConfig.h"
 
 #define ON      1
 #define OFF     0
 
-void delay(uint count);
+void delay(uint millionSeconds);
+int RandomWithRange(int fromNumber, int toNumer);
 
 #ifdef __cplusplus
 }

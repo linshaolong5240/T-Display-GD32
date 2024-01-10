@@ -4,7 +4,14 @@
  extern "C" {
 #endif 
 
-void MTTimerConfig(void);
+typedef enum
+{
+    MTTimerPeriodSecond = 1,
+    MTTimerPeriodMillonSecond = 1000,
+    MTTimerPeriodMicroSecond = 1000000,
+} MTTimerPeriod;
+
+void MTTimerSet(MTTimerPeriod period);
 void MTTimerCountClear(void);
 
 #ifdef __cplusplus

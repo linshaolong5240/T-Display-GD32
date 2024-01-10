@@ -15,8 +15,8 @@ bool tickCountChanged = false;
 void ECLICConfig(void)
 {
     eclic_priority_group_set(ECLIC_PRIGROUP_LEVEL4_PRIO0); // 四位优先级组全配置为lvl 0-15
-    eclic_irq_enable(CLIC_INT_TMR, 15, 0); // 0-15
-    eclic_global_interrupt_enable(); // 使能全局中断
+    eclic_irq_enable(CLIC_INT_TMR, 15, 0);                 // 0-15
+    eclic_global_interrupt_enable();                       // 使能全局中断
 }
 
 /*!
@@ -32,7 +32,7 @@ int main(void)
 
     USARTInit();
     LEDInit();
-    MTTimerConfig();
+    MTTimerSet(MTTimerPeriodMillonSecond);
     ECLICConfig();
 
     printf("eclic_get_clicinfo:0x%X\n", eclic_get_clicinfo());
@@ -44,9 +44,9 @@ int main(void)
         {
             LEDToggle(LED_RED);
             tickCountChanged = false;
-            printf("tickCount %d\n", tickCount);
+            printf("tickCount %d\r\n", tickCount);
+            printf("Machine Timer Vlaue = %u %u\r\n", mtime_hi(), mtime_lo());
         }
-        // printf("timerCount %d\r\n", timerCount);
     }
 }
 

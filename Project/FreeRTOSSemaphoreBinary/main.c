@@ -8,11 +8,14 @@
 #include "task.h"
 #include "semphr.h"
 
+#include "tsprintf.h"
+
 typedef struct
 {
     int value;
 } Message;
 
+TaskHandle_t taskCreater = NULL;
 TaskHandle_t taskA = NULL;
 TaskHandle_t taskB = NULL;
 TaskHandle_t taskC = NULL;
@@ -22,7 +25,7 @@ SemaphoreHandle_t semaphoreBinary = NULL;
 // 系统初始化函数使用标准工具链时没有在main函数前调用,声明后手动调用
 extern void _init();
 
-void TaskCreate(void);
+void TaskCreater(void *parameters);
 void TaskA(void *parameters);
 void TaskB(void *parameters);
 void TaskC(void *parameters);
@@ -41,36 +44,37 @@ int main(void)
     IRQConfigure();
     USARTInit();
     LEDInit();
-
     semaphoreBinary = xSemaphoreCreateBinary();
     if (semaphoreBinary != NULL)
     {
 #if DEBUG
-        rtprintf("Semaphore create Succeed\r\n");
+        tsprintf("Semaphore create Succeed\r\n");
 #endif
     }
     else
     {
 #if DEBUG
-        rtprintf("Semaphore create Failed\r\n");
+        tsprintf("Semaphore create Failed\r\n");
 #endif
     }
-
-    TaskCreate();
+    xTaskCreate(TaskCreater, "TaskCreater", 256, NULL, 2, &taskCreater);
     vTaskStartScheduler();
 
     while (1)
     {
-        rtprintf("RTOS Exit\r\n");
+        tsprintf("RTOS Exit\r\n");
     }
     return 0;
 }
 
-void TaskCreate(void)
+void TaskCreater(void *parameters)
 {
-    xTaskCreate(TaskA, "TaskA", 256, NULL, 3, &taskA);
-    xTaskCreate(TaskB, "TaskB", 256, NULL, 3, &taskB);
-    xTaskCreate(TaskC, "TaskC", 256, NULL, 3, &taskB);
+    taskENTER_CRITICAL();
+    // xTaskCreate(TaskA, "TaskA", 256, NULL, 3, &taskA);
+    // xTaskCreate(TaskB, "TaskB", 256, NULL, 3, &taskB);
+    xTaskCreate(TaskC, "TaskC", 256, NULL, 3, &taskC);
+    taskEXIT_CRITICAL();
+    vTaskDelete(taskCreater);
 }
 
 void TaskA(void *parameters)
@@ -82,14 +86,14 @@ void TaskA(void *parameters)
             if (xQueueSemaphoreTake(semaphoreBinary, portMAX_DELAY) == pdTRUE)
             {
 #if DEBUG
-                rtprintf("TaskA semaphore take succeed\r\n");
+                tsprintf("TaskA semaphore take succeed\r\n");
 #endif
                 LEDToggle(LED_RED);
             }
             else
             {
 #if DEBUG
-                rtprintf("TaskA semaphore take failed\r\n");
+                tsprintf("TaskA semaphore take failed\r\n");
 #endif
             }
         }
@@ -98,6 +102,7 @@ void TaskA(void *parameters)
 
 void TaskB(void *parameters)
 {
+    uint random = 0;
     while (1)
     {
         if (semaphoreBinary != NULL)
@@ -105,14 +110,14 @@ void TaskB(void *parameters)
             if (xQueueSemaphoreTake(semaphoreBinary, portMAX_DELAY) == pdTRUE)
             {
 #if DEBUG
-                rtprintf("TaskB semaphore take succeed\r\n");
+                tsprintf("TaskB semaphore take succeed\r\n");
 #endif
                 LEDToggle(LED_GREEN);
             }
             else
             {
 #if DEBUG
-                rtprintf("TaskB semaphore take failed\r\n");
+                tsprintf("TaskB semaphore take failed\r\n");
 #endif
             }
         }
@@ -121,31 +126,40 @@ void TaskB(void *parameters)
 
 void TaskC(void *parameters)
 {
+    uint random = 0;
+    //     while (1)
+    //     {
+    //         if (xSemaphoreGive(semaphoreBinary) == pdPASS)
+    //         {
+    // #if DEBUG
+    //             tsprintf("TaskC semaphore give succeed\r\n");
+    // #endif
+    //         }
+    //         else
+    //         {
+    // #if DEBUG
+    //             tsprintf("TaskC semaphore give failed\r\n");
+    // #endif
+    //         }
+
+    //     }
     while (1)
     {
-        if (xSemaphoreGive(semaphoreBinary) == pdPASS)
-        {
+        random = RandomWithRange(1, 5);
+        vTaskDelay(random * 1000);
 #if DEBUG
-            rtprintf("TaskC semaphore give succeed\r\n");
+        tsprintf("task c done, delay = %ds\r\n", random);
 #endif
-        }
-        else
-        {
-#if DEBUG
-            rtprintf("TaskC semaphore give failed");
-#endif
-        }
-        vTaskDelay(1000);
     }
 }
 
 void freertos_risc_v_application_exception_handler(UBaseType_t mcause)
 {
 #if DEBUG_EXCEPTION
-    rtprintfISR("exception: 0x%04x\r\n", mcause);
-    rtprintfISR("In trap handler, the mcause is %d\n", mcause);
-    rtprintfISR("In trap handler, the mepc is 0x%x\n", read_csr(mepc));
-    rtprintfISR("In trap handler, the mtval is 0x%x\n", read_csr(mbadaddr));
+    tsprintfisr("exception: 0x%04x\r\n", mcause);
+    tsprintfisr("In trap handler, the mcause is %d\n", mcause);
+    tsprintfisr("In trap handler, the mepc is 0x%x\n", read_csr(mepc));
+    tsprintfisr("In trap handler, the mtval is 0x%x\n", read_csr(mbadaddr));
     _exit(mcause);
 #endif
 }
@@ -153,41 +167,41 @@ void freertos_risc_v_application_exception_handler(UBaseType_t mcause)
 void freertos_risc_v_application_interrupt_handler(UBaseType_t mcause)
 {
 #if DEBUG_INTERRUPT
-    rtprintfISR("interrupt: 0x%04x\r\n", mcause);
+    tsprintfisr("interrupt: 0x%04x\r\n", mcause);
 #endif
 }
 
 void vApplicationTickHook(void)
 {
 #if DEBUG_HOOK
-// rtprintf("Tick\r\n");
+// tsprintf("Tick\r\n");
 #endif
 }
 
 void vApplicationIdleHook(void)
 {
 #if DEBUG_HOOK
-// rtprintf("Idle\r\n");
+// tsprintf("Idle\r\n");
 #endif
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 {
 #if DEBUG_HOOK
-    rtprintf("task：%s Overflow\r\n", pcTaskName);
+    tsprintf("task：%s Overflow\r\n", pcTaskName);
 #endif
 }
 
 void vApplicationMallocFailedHook(void)
 {
 #if DEBUG_HOOK
-    rtprintf("MallocFailed\r\n");
+    tsprintf("MallocFailed\r\n");
 #endif
 }
 
 void vApplicationDaemonTaskStartupHook(void)
 {
 #if DEBUG_HOOK
-    rtprintf("DaemonTask\r\n");
+    tsprintf("DaemonTask\r\n");
 #endif
 }

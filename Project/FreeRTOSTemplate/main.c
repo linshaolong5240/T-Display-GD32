@@ -7,10 +7,12 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "tsprintf.h"
+
 // 系统初始化函数使用标准工具链时没有在main函数前调用,声明后手动调用
 extern void _init();
 
-void TaskCreate(void);
+void TaskCreate();
 void TaskCreater(void *parameters);
 void TaskA(void *parameters);
 void TaskB(void *parameters);
@@ -27,7 +29,6 @@ void IRQConfigure(void)
 {
     eclic_priority_group_set(ECLIC_PRIGROUP_LEVEL4_PRIO0); // 四位优先级组全配置为lvl
     eclic_global_interrupt_enable(); // 使能全局中断
-    // eclic_irq_enable(USART0_IRQn, 1, 0);
 }
 
 /*!
@@ -41,23 +42,24 @@ int main(void)
     size_t size = 0;
     /* systesm init */
     _init();
+
     IRQConfigure();
     USARTInit();
     LEDInit();
 
 #if DEBUG
-    debugprint("1\r\n");
+    tsprintf("1\r\n");
 #endif
     TaskCreate();
     // xTaskCreate(TaskCreater, "TaskCreater", 256, NULL, 2, &taskCreater);
 #if DEBUG
-    debugprint("2\r\n");
+    tsprintf("2\r\n");
 #endif
     vTaskStartScheduler();
 #if DEBUG
     while (1)
     {
-        debugprint("RTOS Exit\r\n");
+        tsprintf("RTOS Exit\r\n");
     }
 #endif
 }
@@ -75,33 +77,33 @@ void TaskCreate(void)
     size_t size = 0;
     size = xPortGetFreeHeapSize();
 #if DEBUG
-    debugprint("tc1 size %d\r\n", size);
+    tsprintf("tc1 size %d\r\n", size);
 #endif
     xTaskCreate(TaskA, "TaskA", 256, NULL, 3, &taskA);
     size = xPortGetFreeHeapSize();
 #if DEBUG
-    debugprint("tc2 size %d\r\n", size);
+    tsprintf("tc2 size %d\r\n", size);
 #endif
     xTaskCreate(TaskB, "TaskB", 256, NULL, 3, &taskB);
     size = xPortGetFreeHeapSize();
 #if DEBUG
-    debugprint("tc3 size %d\r\n", size);
+    tsprintf("tc3 size %d\r\n", size);
 #endif
     xTaskCreate(TaskC, "TaskC", 256, NULL, 3, &taskC);
     size = xPortGetFreeHeapSize();
 #if DEBUG
-    debugprint("tc4 size %d\r\n", size);
+    tsprintf("tc4 size %d\r\n", size);
 #endif
     xTaskCreate(TaskD, "TaskD", 256, NULL, 2, &taskD);
     size = xPortGetFreeHeapSize();
 #if DEBUG
-    debugprint("tc5 size %d\r\n", size);
+    tsprintf("tc5 size %d\r\n", size);
 #endif
 #if DEBUG
-    debugprint("A=%x\r\n", taskA);
-    debugprint("B=%x\r\n", taskB);
-    debugprint("C=%x\r\n", taskC);
-    debugprint("D=%x\r\n", taskD);
+    tsprintf("A=%x\r\n", taskA);
+    tsprintf("B=%x\r\n", taskB);
+    tsprintf("C=%x\r\n", taskC);
+    tsprintf("D=%x\r\n", taskD);
 #endif
 }
 
@@ -124,11 +126,11 @@ void TaskA(void *parameters)
     {
 #if DEBUG
         taskENTER_CRITICAL();
-        debugprint("TaskA\r\n");
+        tsprintf("TaskA\r\n");
         // size = xPortGetFreeHeapSize();
-        // debugprint("ta size %d\r\n", size);
+        // tsprintf("ta size %d\r\n", size);
         // mark = uxTaskGetStackHighWaterMark(taskA);
-        // debugprint("mark %d\r\n", mark);
+        // tsprintf("mark %d\r\n", mark);
         taskEXIT_CRITICAL();
 #endif
         LEDToggle(LED_RED);
@@ -142,7 +144,7 @@ void TaskB(void *parameters)
     {
 #if DEBUG
         taskENTER_CRITICAL();
-        rtprintf("TaskB\r\n");
+        tsprintf("TaskB\r\n");
         taskEXIT_CRITICAL();
 #endif
         LEDToggle(LED_GREEN);
@@ -156,7 +158,7 @@ void TaskC(void *parameters)
     {
 #if DEBUG
         taskENTER_CRITICAL();
-        debugprint("TaskC\r\n");
+        tsprintf("TaskC\r\n");
         taskEXIT_CRITICAL();
 #endif
         LEDToggle(LED_BLUE);
@@ -172,11 +174,11 @@ void TaskD(void *parameters)
     {
 #if DEBUG
         taskENTER_CRITICAL();
-        debugprint("TaskD\r\n");
+        tsprintf("TaskD\r\n");
         size = xPortGetFreeHeapSize();
-        debugprint("FreeHeapSize %d\r\n", size);
+        tsprintf("FreeHeapSize %d\r\n", size);
         mark = uxTaskGetStackHighWaterMark2(taskD);
-        debugprint("StackHighWaterMark %d\r\n", mark);
+        tsprintf("StackHighWaterMark %d\r\n", mark);
         taskEXIT_CRITICAL();
 #endif
         vTaskDelay(1000);
@@ -188,7 +190,7 @@ void freertos_risc_v_application_exception_handler(UBaseType_t mcause)
     UBaseType_t status = 0;
 
     status = taskENTER_CRITICAL_FROM_ISR();
-    debugprint("exception: 0x%04x\r\n", mcause);
+    tsprintf("exception: 0x%04x\r\n", mcause);
     taskEXIT_CRITICAL_FROM_ISR(status);
     // write(1, "trap\n", 5);
     // printf("In trap handler, the mcause is %d\n", mcause);
@@ -203,37 +205,37 @@ void freertos_risc_v_application_interrupt_handler(UBaseType_t mcause)
     UBaseType_t status = 0;
 
     status = taskENTER_CRITICAL_FROM_ISR();
-    debugprint("interrupt: 0x%04x\r\n", mcause);
+    tsprintf("interrupt: 0x%04x\r\n", mcause);
     taskEXIT_CRITICAL_FROM_ISR(status);
 }
 
 void vApplicationTickHook(void)
 {
-    // rtprintf("Tick\r\n");
+    // tsprintf("Tick\r\n");
 }
 
 void vApplicationIdleHook(void)
 {
-    // rtprintf("Idle\r\n");
+    // tsprintf("Idle\r\n");
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 {
 #if DEBUG_HOOK
-    debugprint("task：%s Overflow\r\n", pcTaskName);
+    tsprintf("task：%s Overflow\r\n", pcTaskName);
 #endif
 }
 
 void vApplicationMallocFailedHook(void)
 {
 #if DEBUG_HOOK
-    debugprint("MallocFailed\r\n");
+    tsprintf("MallocFailed\r\n");
 #endif
 }
 
 void vApplicationDaemonTaskStartupHook(void)
 {
 #if DEBUG_HOOK
-    debugprint("DaemonTask\r\n");
+    tsprintf("DaemonTask\r\n");
 #endif
 }

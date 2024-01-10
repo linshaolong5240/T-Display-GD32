@@ -14,12 +14,19 @@ void delay(uint millionSeconds)
 
     /* get current timer value */
     uint64_t tmp = get_timer_value();
-    do{
+    do {
         start_mtime = get_timer_value();
-    }while(start_mtime == tmp);
+    } while(start_mtime == tmp);
 
     /* continue counting until the delay time is reached */
-    do{
+    do {
         delta_mtime = get_timer_value() - start_mtime;
-    }while(delta_mtime <(SystemCoreClock/4000 * millionSeconds));
+    } while(delta_mtime < (SystemCoreClock / 4000 * millionSeconds));
+}
+
+int RandomWithRange(int fromNumber, int toNumer)
+{
+    int minNumber = toNumer < fromNumber ? toNumer : fromNumber;
+    int maxNumber = fromNumber > toNumer ? fromNumber : toNumer;
+    return rand() % (maxNumber - minNumber + 1) + minNumber;;
 }

@@ -141,7 +141,7 @@ void TaskB(void *parameters)
     {
 #if DEBUG
         taskENTER_CRITICAL();
-        rtprintf("TaskB\r\n");
+        tsprintf("TaskB\r\n");
         taskEXIT_CRITICAL();
 #endif
         LEDToggle(LED_GREEN);
@@ -208,12 +208,12 @@ void freertos_risc_v_application_interrupt_handler(UBaseType_t mcause)
 
 void vApplicationTickHook(void)
 {
-    // rtprintf("Tick\r\n");
+    // tsprintf("Tick\r\n");
 }
 
 void vApplicationIdleHook(void)
 {
-    // rtprintf("Idle\r\n");
+    // tsprintf("Idle\r\n");
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
