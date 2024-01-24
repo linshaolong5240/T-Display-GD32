@@ -49,7 +49,7 @@ $(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/GD32VF103_standard_peripheral/*.c)
 $(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/drivers/*.c) \
 $(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/env_Eclipse/*.c) \
 $(wildcard $(GD32VF103_FIRMWARE_DIR)/Firmware/RISCV/stubs/*.c) \
-$(wildcard SDK/*.c) \
+$(wildcard $(SDK_DIR)/*.c) \
 
 # OS
 

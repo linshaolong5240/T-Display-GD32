@@ -9,8 +9,9 @@ make clean
 #
 # TARGET=ADC0
 # TARGET=ADC0Temperature
-TARGET=HelloWorld
+# TARGET=HelloWorld
 # TARGET=MachineTimer
+TARGET=USART
 
 # FreeRTOS TARGET
 #
