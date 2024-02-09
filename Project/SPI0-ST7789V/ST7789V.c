@@ -581,7 +581,7 @@ void ST7789VDrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
                 r       半径
       返回值：  无
 ******************************************************************************/
-void Draw_Circle(u16 x0, u16 y0, u8 r, u16 color)
+void ST7789VDrawCircle(u16 x0, u16 y0, u8 r, u16 color)
 {
     int a, b;
     // int di;
@@ -671,7 +671,7 @@ void ST7789VShowString(u16 x, u16 y, const u8 *p, u16 color)
       入口数据：m底数，n指数
       返回值：  无
 ******************************************************************************/
-u32 mypow(u8 m, u8 n)
+u32 ST7789Pow(u8 m, u8 n)
 {
     u32 result = 1;
     while (n--)result *= m;
@@ -691,7 +691,7 @@ void ST7789VShowNum(u16 x, u16 y, u16 num, u8 len, u16 color)
     u8 t, temp;
     u8 enshow = 0;
     for (t = 0; t < len; t++) {
-        temp = (num / mypow(10, len - t - 1)) % 10;
+        temp = (num / ST7789Pow(10, len - t - 1)) % 10;
         if (enshow == 0 && t < (len - 1)) {
             if (temp == 0) {
                 ST7789VShowChar(x + 8 * t, y, ' ', 0, color);
@@ -718,7 +718,7 @@ void ST7789VShowNum1(u16 x, u16 y, float num, u8 len, u16 color)
     u16 num1;
     num1 = num * 100;
     for (t = 0; t < len; t++) {
-        temp = (num1 / mypow(10, len - t - 1)) % 10;
+        temp = (num1 / ST7789Pow(10, len - t - 1)) % 10;
         if (t == (len - 2)) {
             ST7789VShowChar(x + 8 * (len - 2), y, '.', 0, color);
             t++;
