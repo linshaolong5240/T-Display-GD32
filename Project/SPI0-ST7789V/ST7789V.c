@@ -6,14 +6,14 @@
 #define ST7789V_CS_PORT                 GPIOB
 #define ST7789V_CS_PIN                  GPIO_PIN_2
 #define ST7789V_CS_ACTIVE               RESET
-#define ST7789V_CS_DEACTIVE             SET
 #define ST7789VCSActive()               gpio_bit_write(ST7789V_CS_PORT, ST7789V_CS_PIN, ST7789V_CS_ACTIVE)
-#define ST7789VCSDeactive()             gpio_bit_write(ST7789V_CS_PORT, ST7789V_CS_PIN, ST7789V_CS_DEACTIVE)
+#define ST7789VCSDeactive()             gpio_bit_write(ST7789V_CS_PORT, ST7789V_CS_PIN, ~ST7789V_CS_ACTIVE)
 
 #define ST7789V_RESET_PORT              GPIOB
 #define ST7789V_RESET_PIN               GPIO_PIN_1
-#define ST7789VResetActive()            gpio_bit_write(ST7789V_RESET_PORT, ST7789V_RESET_PIN, SET)
-#define ST7789VResetDeactive()          gpio_bit_write(ST7789V_RESET_PORT, ST7789V_RESET_PIN, RESET)
+#define ST7789V_RESET_ACTIVE            SET
+#define ST7789VResetActive()            gpio_bit_write(ST7789V_RESET_PORT, ST7789V_RESET_PIN, ST7789V_RESET_ACTIVE)
+#define ST7789VResetDeactive()          gpio_bit_write(ST7789V_RESET_PORT, ST7789V_RESET_PIN, ~ST7789V_RESET_ACTIVE)
 
 #define ST7789V_DC_PORT                 GPIOB
 #define ST7789V_DC_PIN                  GPIO_PIN_0
@@ -24,9 +24,8 @@
 #define ST7789V_BLACKLIGHT_PORT_MODE        GPIO_MODE_OUT_PP
 #define ST7789V_BLACKLIGHT_PIN              GPIO_PIN_10
 #define ST7789V_BLACKLIGHT_ACTIVE           SET
-#define ST7789V_BLACKLIGHT_DEACTIVE         RESET
 #define ST7789VBlackLightActive()            gpio_bit_write(ST7789V_BLACKLIGHT_PORT, ST7789V_BLACKLIGHT_PIN, ST7789V_BLACKLIGHT_ACTIVE)
-#define ST7789VBlackLightDeactive()          gpio_bit_write(ST7789V_BLACKLIGHT_PORT, ST7789V_BLACKLIGHT_PIN, ST7789V_BLACKLIGHT_DEACTIVE)
+#define ST7789VBlackLightDeactive()          gpio_bit_write(ST7789V_BLACKLIGHT_PORT, ST7789V_BLACKLIGHT_PIN, ~ST7789V_BLACKLIGHT_ACTIVE)
 
 #define ST7789_SLPOUT       0x11
 #define ST7789_NORON        0x13
@@ -224,9 +223,13 @@ void ST7789VGPIOInit(void)
     gpio_init(SPI0_GPIO_PORT, SPI0_GPIO_MODE, GPIO_OSPEED_50MHZ, SPI0_SCK_PIN | SPI0_MISO_PIN | SPI0_MOSI_PIN);
     SPIConfig();
 
-    /* Backlight power control pin, high active  */    
     rcu_periph_clock_enable(RCU_GPIOB);
-    gpio_bit_write(ST7789V_BLACKLIGHT_PORT, ST7789V_BLACKLIGHT_PIN, ST7789V_BLACKLIGHT_DEACTIVE);
+    /* DC/PB0, Rest/PB1 */
+    gpio_bit_reset(GPIOB, GPIO_PIN_0 | GPIO_PIN_1);
+    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_0 | GPIO_PIN_1);
+
+    /* Backlight power control pin / PB10 */    
+    gpio_bit_write(ST7789V_BLACKLIGHT_PORT, ST7789V_BLACKLIGHT_PIN, ~ST7789V_BLACKLIGHT_ACTIVE);
     gpio_init(ST7789V_BLACKLIGHT_PORT, ST7789V_BLACKLIGHT_PORT_MODE, GPIO_OSPEED_50MHZ, ST7789V_BLACKLIGHT_PIN);
 }
 
@@ -265,8 +268,6 @@ void ST7789VInit(void)
     gpio_bit_reset(GPIOB, GPIO_PIN_2);
 #endif
 
-    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_0 | GPIO_PIN_1);
-    gpio_bit_reset(GPIOB, GPIO_PIN_0 | GPIO_PIN_1);
 
     OLED_RST_Clr();
     delay(200);

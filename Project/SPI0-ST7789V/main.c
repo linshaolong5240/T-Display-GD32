@@ -61,20 +61,20 @@ int main(void)
     printf("ST7789VClear\r\n");
     BACK_COLOR = BLACK;
     ST7789VSetRotation(1);
-    ST7789VShowString(0, 0, (char *)("Sauron Pi"), GREEN);
-    ST7789VShowString(0, 16, (char *)("Sauron Pi"), BLUE);
-    ST7789VShowString(0, 32, (char *)("Sauron Pi"), BRED);
-    ST7789VShowString(0, 48, (char *)("Sauron Pi"), GBLUE);
-    ST7789VShowString(0, 64, (char *)("Sauron Pi"), RED);
-    printf("ST7789VShowString\r\n");
-    while (1)
-    {
-        delay(1000);
-        ST7789VClear(BLACK);
-        ST7789VShowString(0, index * 16, (char *)("Sauron Pi"), GREEN);
-        index++;
-        if (index * 16 > 135 - 16) {
-            index = 0;
-        }
-    }
+    ST7789VShowString(0, 0, "Sauron Pi", RED);
+    ST7789VShowString(0, 16, "Sauron Pi", GREEN);
+    ST7789VShowString(0, 32, "Sauron Pi", BLUE);
+    // ST7789VShowString(0, 48, (char *)("Sauron Pi"), GBLUE);
+    // ST7789VShowString(0, 64, (char *)("Sauron Pi"), RED);
+    // printf("ST7789VShowString\r\n");
+    // while (1)
+    // {
+    //     delay(1000);
+    //     ST7789VClear(BLACK);
+    //     ST7789VShowString(0, index * 16, (char *)("Sauron Pi"), GREEN);
+    //     index++;
+    //     if (index * 16 > 135 - 16) {
+    //         index = 0;
+    //     }
+    // }
 }
