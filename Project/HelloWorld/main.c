@@ -18,6 +18,11 @@ int main(void)
     USARTInit();
     LEDInit();
 
+    printf("size of char = %d\r\n", sizeof(char));
+    printf("size of short = %d\r\n", sizeof(short));
+    printf("size of int = %d\r\n", sizeof(int));
+    printf("size of long = %d\r\n", sizeof(long));
+
     while (1)
     {
         printf("hello, world\r\n");
