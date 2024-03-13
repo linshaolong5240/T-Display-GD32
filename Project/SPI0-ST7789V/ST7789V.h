@@ -58,8 +58,8 @@ typedef unsigned long u32;
 extern  u16 BACK_COLOR;   //背景色
 
 void ST7789VSPISendData(u8 data);
-void ST7789VSPISend8Bit(u8 data);
-void ST7789VSPISend16Bit(u16 data);
+void ST7789VSPISendData8Bit(u8 data);
+void ST7789VSPISendData16Bit(u16 data);
 void ST7789VSPISendCommand(u8 command);
 void ST7789VAddressSet(u16 x1, u16 y1, u16 x2, u16 y2);
 void ST7789VInit(void);

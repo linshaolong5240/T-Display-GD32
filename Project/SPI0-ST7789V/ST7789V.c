@@ -105,7 +105,7 @@ void ST7789VSPISendData(u8 data)
       入口数据：dat 写入的数据
       返回值：  无
 ******************************************************************************/
-void ST7789VSPISend8Bit(u8 data)
+void ST7789VSPISendData8Bit(u8 data)
 {
     ST7789VDataMode();
     ST7789VSPISendData(data);
@@ -117,7 +117,7 @@ void ST7789VSPISend8Bit(u8 data)
       入口数据：dat 写入的数据
       返回值：  无
 ******************************************************************************/
-void ST7789VSPISend16Bit(u16 data)
+void ST7789VSPISendData16Bit(u16 data)
 {
     ST7789VDataMode();
     ST7789VSPISendData(data >> 8);
@@ -146,11 +146,11 @@ void ST7789VSPISendCommand(u8 command)
 void ST7789VAddressSet(u16 x1, u16 y1, u16 x2, u16 y2)
 {
     ST7789VSPISendCommand(0x2a);//列地址设置
-    ST7789VSPISend16Bit(x1 + colstart);
-    ST7789VSPISend16Bit(x2 + colstart);
+    ST7789VSPISendData16Bit(x1 + colstart);
+    ST7789VSPISendData16Bit(x2 + colstart);
     ST7789VSPISendCommand(0x2b);//行地址设置
-    ST7789VSPISend16Bit(y1 + rowstart);
-    ST7789VSPISend16Bit(y2 + rowstart);
+    ST7789VSPISendData16Bit(y1 + rowstart);
+    ST7789VSPISendData16Bit(y2 + rowstart);
     ST7789VSPISendCommand(0x2c);//储存器写
 }
 
@@ -282,99 +282,99 @@ void ST7789VInit(void)
 
     //------------------------------display and color format setting--------------------------------//
     ST7789VSPISendCommand(ST7789_MADCTL);
-    //ST7789VSPISend8Bit(0x00);
-    ST7789VSPISend8Bit(TFT_MAD_RGB);
+    //ST7789VSPISendData8Bit(0x00);
+    ST7789VSPISendData8Bit(TFT_MAD_RGB);
 
     // JLX240 display datasheet
-    ST7789VSPISendCommand(0xB6);
-    ST7789VSPISend8Bit(0x0A);
-    ST7789VSPISend8Bit(0x82);
+    // ST7789VSPISendCommand(0xB6);
+    // ST7789VSPISendData8Bit(0x0A);
+    // ST7789VSPISendData8Bit(0x82);
 
     ST7789VSPISendCommand(ST7789_COLMOD);
-    ST7789VSPISend8Bit(0x55);
+    ST7789VSPISendData8Bit(0x55);
     delay(10);
 
     //--------------------------------ST7789V Frame rate setting----------------------------------//
     ST7789VSPISendCommand(ST7789_PORCTRL);
-    ST7789VSPISend8Bit(0x0c);
-    ST7789VSPISend8Bit(0x0c);
-    ST7789VSPISend8Bit(0x00);
-    ST7789VSPISend8Bit(0x33);
-    ST7789VSPISend8Bit(0x33);
+    ST7789VSPISendData8Bit(0x0c);
+    ST7789VSPISendData8Bit(0x0c);
+    ST7789VSPISendData8Bit(0x00);
+    ST7789VSPISendData8Bit(0x33);
+    ST7789VSPISendData8Bit(0x33);
 
     ST7789VSPISendCommand(ST7789_GCTRL);      // Voltages: VGH / VGL
-    ST7789VSPISend8Bit(0x35);
+    ST7789VSPISendData8Bit(0x35);
 
     //---------------------------------ST7789V Power setting--------------------------------------//
     ST7789VSPISendCommand(ST7789_VCOMS);
-    ST7789VSPISend8Bit(0x28);       // JLX240 display datasheet
+    ST7789VSPISendData8Bit(0x28);       // JLX240 display datasheet
 
     ST7789VSPISendCommand(ST7789_LCMCTRL);
-    ST7789VSPISend8Bit(0x0C);
+    ST7789VSPISendData8Bit(0x0C);
 
     ST7789VSPISendCommand(ST7789_VDVVRHEN);
-    ST7789VSPISend8Bit(0x01);
-    ST7789VSPISend8Bit(0xFF);
+    ST7789VSPISendData8Bit(0x01);
+    ST7789VSPISendData8Bit(0xFF);
 
     ST7789VSPISendCommand(ST7789_VRHS);       // voltage VRHS
-    ST7789VSPISend8Bit(0x10);
+    ST7789VSPISendData8Bit(0x10);
 
     ST7789VSPISendCommand(ST7789_VDVSET);
-    ST7789VSPISend8Bit(0x20);
+    ST7789VSPISendData8Bit(0x20);
 
     ST7789VSPISendCommand(ST7789_FRCTR2);
-    ST7789VSPISend8Bit(0x0f);
+    ST7789VSPISendData8Bit(0x0f);
 
     ST7789VSPISendCommand(ST7789_PWCTRL1);
-    ST7789VSPISend8Bit(0xa4);
-    ST7789VSPISend8Bit(0xa1);
+    ST7789VSPISendData8Bit(0xa4);
+    ST7789VSPISendData8Bit(0xa1);
 
     //--------------------------------ST7789V gamma setting---------------------------------------//
     ST7789VSPISendCommand(ST7789_PVGAMCTRL);
-    ST7789VSPISend8Bit(0xd0);
-    ST7789VSPISend8Bit(0x00);
-    ST7789VSPISend8Bit(0x02);
-    ST7789VSPISend8Bit(0x07);
-    ST7789VSPISend8Bit(0x0a);
-    ST7789VSPISend8Bit(0x28);
-    ST7789VSPISend8Bit(0x32);
-    ST7789VSPISend8Bit(0x44);
-    ST7789VSPISend8Bit(0x42);
-    ST7789VSPISend8Bit(0x06);
-    ST7789VSPISend8Bit(0x0e);
-    ST7789VSPISend8Bit(0x12);
-    ST7789VSPISend8Bit(0x14);
-    ST7789VSPISend8Bit(0x17);
+    ST7789VSPISendData8Bit(0xd0);
+    ST7789VSPISendData8Bit(0x00);
+    ST7789VSPISendData8Bit(0x02);
+    ST7789VSPISendData8Bit(0x07);
+    ST7789VSPISendData8Bit(0x0a);
+    ST7789VSPISendData8Bit(0x28);
+    ST7789VSPISendData8Bit(0x32);
+    ST7789VSPISendData8Bit(0x44);
+    ST7789VSPISendData8Bit(0x42);
+    ST7789VSPISendData8Bit(0x06);
+    ST7789VSPISendData8Bit(0x0e);
+    ST7789VSPISendData8Bit(0x12);
+    ST7789VSPISendData8Bit(0x14);
+    ST7789VSPISendData8Bit(0x17);
 
     ST7789VSPISendCommand(ST7789_NVGAMCTRL);
-    ST7789VSPISend8Bit(0xd0);
-    ST7789VSPISend8Bit(0x00);
-    ST7789VSPISend8Bit(0x02);
-    ST7789VSPISend8Bit(0x07);
-    ST7789VSPISend8Bit(0x0a);
-    ST7789VSPISend8Bit(0x28);
-    ST7789VSPISend8Bit(0x31);
-    ST7789VSPISend8Bit(0x54);
-    ST7789VSPISend8Bit(0x47);
-    ST7789VSPISend8Bit(0x0e);
-    ST7789VSPISend8Bit(0x1c);
-    ST7789VSPISend8Bit(0x17);
-    ST7789VSPISend8Bit(0x1b);
-    ST7789VSPISend8Bit(0x1e);
+    ST7789VSPISendData8Bit(0xd0);
+    ST7789VSPISendData8Bit(0x00);
+    ST7789VSPISendData8Bit(0x02);
+    ST7789VSPISendData8Bit(0x07);
+    ST7789VSPISendData8Bit(0x0a);
+    ST7789VSPISendData8Bit(0x28);
+    ST7789VSPISendData8Bit(0x31);
+    ST7789VSPISendData8Bit(0x54);
+    ST7789VSPISendData8Bit(0x47);
+    ST7789VSPISendData8Bit(0x0e);
+    ST7789VSPISendData8Bit(0x1c);
+    ST7789VSPISendData8Bit(0x17);
+    ST7789VSPISendData8Bit(0x1b);
+    ST7789VSPISendData8Bit(0x1e);
 
     ST7789VSPISendCommand(ST7789_INVON);
 
     ST7789VSPISendCommand(ST7789_CASET);    // Column address set
-    ST7789VSPISend8Bit(0x00);
-    ST7789VSPISend8Bit(0x00);
-    ST7789VSPISend8Bit(0x00);
-    ST7789VSPISend8Bit(0xE5);    // 239
+    ST7789VSPISendData8Bit(0x00);
+    ST7789VSPISendData8Bit(0x00);
+    ST7789VSPISendData8Bit(0x00);
+    ST7789VSPISendData8Bit(0xE5);    // 239
 
     ST7789VSPISendCommand(ST7789_RASET);    // Row address set
-    ST7789VSPISend8Bit(0x00);
-    ST7789VSPISend8Bit(0x00);
-    ST7789VSPISend8Bit(0x01);
-    ST7789VSPISend8Bit(0x3F);    // 319
+    ST7789VSPISendData8Bit(0x00);
+    ST7789VSPISendData8Bit(0x00);
+    ST7789VSPISendData8Bit(0x01);
+    ST7789VSPISendData8Bit(0x3F);    // 319
 
 
     delay(120);
@@ -395,7 +395,7 @@ void ST7789VSetRotation(uint8_t m)
         rowstart = 40;
         _width  = _init_width;
         _height = _init_height;
-        ST7789VSPISend8Bit(TFT_MAD_COLOR_ORDER);
+        ST7789VSPISendData8Bit(TFT_MAD_COLOR_ORDER);
         break;
 
     case 1:
@@ -403,21 +403,21 @@ void ST7789VSetRotation(uint8_t m)
         rowstart = 53;
         _width  = _init_height;
         _height = _init_width;
-        ST7789VSPISend8Bit(TFT_MAD_MX | TFT_MAD_MV | TFT_MAD_COLOR_ORDER);
+        ST7789VSPISendData8Bit(TFT_MAD_MX | TFT_MAD_MV | TFT_MAD_COLOR_ORDER);
         break;
     case 2:
         colstart = 52;
         rowstart = 40;
         _width  = _init_width;
         _height = _init_height;
-        ST7789VSPISend8Bit(TFT_MAD_MX | TFT_MAD_MY | TFT_MAD_COLOR_ORDER);
+        ST7789VSPISendData8Bit(TFT_MAD_MX | TFT_MAD_MY | TFT_MAD_COLOR_ORDER);
         break;
     case 3:
         colstart = 40;
         rowstart = 52;
         _width  = _init_height;
         _height = _init_width;
-        ST7789VSPISend8Bit(TFT_MAD_MV | TFT_MAD_MY | TFT_MAD_COLOR_ORDER);
+        ST7789VSPISendData8Bit(TFT_MAD_MV | TFT_MAD_MY | TFT_MAD_COLOR_ORDER);
         break;
     }
 }
@@ -438,7 +438,7 @@ void ST7789VClear(u16 Color)
     ST7789VAddressSet(0, 0, _width - 1, _height - 1);
     for (i = 0; i < _width; i++) {
         for (j = 0; j < _height; j++) {
-            ST7789VSPISend16Bit(Color);
+            ST7789VSPISendData16Bit(Color);
         }
     }
 }
@@ -471,9 +471,9 @@ void ST7789VShowChinese(u16 x, u16 y, u8 index, u8 size, u16 color)
     for (j = 0; j < size1; j++) {
         for (i = 0; i < 8; i++) {
             if ((*temp & (1 << i)) != 0) { //从数据的低位开始读
-                ST7789VSPISend16Bit(color);//点亮
+                ST7789VSPISendData16Bit(color);//点亮
             } else {
-                ST7789VSPISend16Bit(BACK_COLOR);//不点亮
+                ST7789VSPISendData16Bit(BACK_COLOR);//不点亮
             }
         }
         temp++;
@@ -489,7 +489,7 @@ void ST7789VShowChinese(u16 x, u16 y, u8 index, u8 size, u16 color)
 void ST7789VDrawPoint(u16 x, u16 y, u16 color)
 {
     ST7789VAddressSet(x, y, x, y); //设置光标位置
-    ST7789VSPISend16Bit(color);
+    ST7789VSPISendData16Bit(color);
 }
 
 
@@ -515,7 +515,7 @@ void ST7789VFill(u16 xsta, u16 ysta, u16 xend, u16 yend, u16 color)
     u16 i, j;
     ST7789VAddressSet(xsta, ysta, xend, yend);   //设置光标位置
     for (i = ysta; i <= yend; i++) {
-        for (j = xsta; j <= xend; j++)ST7789VSPISend16Bit(color); //设置光标位置
+        for (j = xsta; j <= xend; j++)ST7789VSPISendData16Bit(color); //设置光标位置
     }
 }
 
@@ -627,8 +627,8 @@ void ST7789VShowChar(u16 x, u16 y, u8 num, u8 mode, u16 color)
         for (pos = 0; pos < 16; pos++) {
             temp = asc2_1608[(u16)num * 16 + pos];   //调用1608字体
             for (t = 0; t < 8; t++) {
-                if (temp & 0x01)ST7789VSPISend16Bit(color);
-                else ST7789VSPISend16Bit(BACK_COLOR);
+                if (temp & 0x01)ST7789VSPISendData16Bit(color);
+                else ST7789VSPISendData16Bit(BACK_COLOR);
                 temp >>= 1;
                 x++;
             }
@@ -744,6 +744,6 @@ void ST7789VShowPicture(u16 x1, u16 y1, u16 x2, u16 y2)
     int i;
     ST7789VAddressSet(x1, y1, x2, y2);
     for (i = 0; i < 12800; i++) {
-        ST7789VSPISend8Bit(image[i]);
+        ST7789VSPISendData8Bit(image[i]);
     }
 }
