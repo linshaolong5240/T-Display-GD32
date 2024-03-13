@@ -6,7 +6,6 @@
 #include "gd32vf103_gpio.h"
 
 #define USE_HORIZONTAL  0  //设置横屏或者竖屏显示 0或1为竖屏 2或3为横屏
-#define HAS_BLK_CNTL    0
 
 // #if USE_HORIZONTAL==0||USE_HORIZONTAL==2
 // #define ST7789VW 240
@@ -19,12 +18,6 @@
 typedef unsigned char u8;
 typedef unsigned int u16;
 typedef unsigned long u32;
-
-// #define LED_ON gpio_bit_reset(GPIOC,GPIO_PIN_13)
-// #define LED_OFF gpio_bit_set(GPIOC,GPIO_PIN_13)
-
-#define LED_ON
-#define LED_OFF
 
 #define SPI0_CFG 1  //hardware spi
 // #define SPI0_CFG 2  //hardware spi dma
@@ -62,35 +55,18 @@ typedef unsigned long u32;
 #define OLED_CS_Set()  gpio_bit_set(GPIOB,GPIO_PIN_2)
 #endif /* SPI0_CFG */
 
-#define OLED_RST_Clr() gpio_bit_reset(GPIOB,GPIO_PIN_1)     //RES PB1
-#define OLED_RST_Set() gpio_bit_set(GPIOB,GPIO_PIN_1)
-
-#define OLED_DC_Clr() gpio_bit_reset(GPIOB,GPIO_PIN_0)      //DC PB0
-#define OLED_DC_Set() gpio_bit_set(GPIOB,GPIO_PIN_0)
-
-
-#if     HAS_BLK_CNTL
-#define OLED_BLK_Clr()  gpio_bit_reset(GPIOA,GPIO_PIN_5)//BLK
-#define OLED_BLK_Set()  gpio_bit_set(GPIOA,GPIO_PIN_5)
-#else
-#define OLED_BLK_Clr()
-#define OLED_BLK_Set()
-#endif
-
-#define OLED_CMD  0 //写命令
-#define OLED_DATA 1 //写数据
-
 extern  u16 BACK_COLOR;   //背景色
 
-void ST7789VWriteBus(u8 dat);
-void ST7789VWrite8Bit(u8 dat);
-void ST7789VWrite16Bit(u16 dat);
-void ST7789VWriteCommand(u8 dat);
+void ST7789VSPISendData(u8 data);
+void ST7789VSPISend8Bit(u8 data);
+void ST7789VSPISend16Bit(u16 data);
+void ST7789VSPISendCommand(u8 command);
 void ST7789VAddressSet(u16 x1, u16 y1, u16 x2, u16 y2);
 void ST7789VInit(void);
 void ST7789VSetRotation(uint8_t m);
 void ST7789VBacklightEnable(bool enable);
 void ST7789VClear(u16 Color);
+void ST7789VSetBackgroundColor(u16 color);
 void ST7789VShowChinese(u16 x, u16 y, u8 index, u8 size, u16 color);
 void ST7789VDrawPoint(u16 x, u16 y, u16 color);
 void ST7789VDrawPoint_big(u16 x, u16 y, u16 color);
@@ -130,12 +106,10 @@ void ST7789VShowLogo(void);
 //以上三色为PANEL的颜色
 
 #define LIGHTGREEN       0X841F //浅绿色
-#define LGRAY                0XC618 //浅灰色(PANNEL),窗体背景色
+#define LGRAY            0XC618 //浅灰色(PANNEL),窗体背景色
 
 #define LGRAYBLUE        0XA651 //浅灰蓝色(中间层颜色)
 #define LBBLUE           0X2B12 //浅棕蓝色(选择条目的反色)
-
-
 
 #endif
 

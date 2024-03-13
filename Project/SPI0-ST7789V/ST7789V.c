@@ -3,29 +3,29 @@
 #include "bmp.h"
 
 #include "PCBConfig.h"
-#define ST7789V_CS_PORT                 GPIOB
-#define ST7789V_CS_PIN                  GPIO_PIN_2
-#define ST7789V_CS_ACTIVE               RESET
-#define ST7789VCSActive()               gpio_bit_write(ST7789V_CS_PORT, ST7789V_CS_PIN, ST7789V_CS_ACTIVE)
-#define ST7789VCSDeactive()             gpio_bit_write(ST7789V_CS_PORT, ST7789V_CS_PIN, ~ST7789V_CS_ACTIVE)
+#define ST7789V_CS_PORT                     GPIOB
+#define ST7789V_CS_PIN                      GPIO_PIN_2
+#define ST7789V_CS_ACTIVE                   RESET
+#define ST7789VChipSelect()                 gpio_bit_write(ST7789V_CS_PORT, ST7789V_CS_PIN, ST7789V_CS_ACTIVE)
+#define ST7789VChipDeselect()               gpio_bit_write(ST7789V_CS_PORT, ST7789V_CS_PIN, ~ST7789V_CS_ACTIVE)
 
-#define ST7789V_RESET_PORT              GPIOB
-#define ST7789V_RESET_PIN               GPIO_PIN_1
-#define ST7789V_RESET_ACTIVE            SET
-#define ST7789VResetActive()            gpio_bit_write(ST7789V_RESET_PORT, ST7789V_RESET_PIN, ST7789V_RESET_ACTIVE)
-#define ST7789VResetDeactive()          gpio_bit_write(ST7789V_RESET_PORT, ST7789V_RESET_PIN, ~ST7789V_RESET_ACTIVE)
+#define ST7789V_RESET_PORT                  GPIOB
+#define ST7789V_RESET_PIN                   GPIO_PIN_1
+#define ST7789V_RESET_ACTIVE                RESET
+#define ST7789VResetActive()                gpio_bit_write(ST7789V_RESET_PORT, ST7789V_RESET_PIN, ST7789V_RESET_ACTIVE)
+#define ST7789VResetDeactive()              gpio_bit_write(ST7789V_RESET_PORT, ST7789V_RESET_PIN, ~ST7789V_RESET_ACTIVE)
 
-#define ST7789V_DC_PORT                 GPIOB
-#define ST7789V_DC_PIN                  GPIO_PIN_0
-#define ST7789VDataMode()               gpio_bit_write(ST7789V_DC_PORT, ST7789V_DC_PIN, SET)
-#define ST7789VCommandMode()            gpio_bit_write(ST7789V_DC_PORT, ST7789V_DC_PIN, RESET)
+#define ST7789V_DC_PORT                     GPIOB
+#define ST7789V_DC_PIN                      GPIO_PIN_0
+#define ST7789VDataMode()                   gpio_bit_write(ST7789V_DC_PORT, ST7789V_DC_PIN, SET)
+#define ST7789VCommandMode()                gpio_bit_write(ST7789V_DC_PORT, ST7789V_DC_PIN, RESET)
 
 #define ST7789V_BLACKLIGHT_PORT             GPIOB
 #define ST7789V_BLACKLIGHT_PORT_MODE        GPIO_MODE_OUT_PP
 #define ST7789V_BLACKLIGHT_PIN              GPIO_PIN_10
 #define ST7789V_BLACKLIGHT_ACTIVE           SET
-#define ST7789VBlackLightActive()            gpio_bit_write(ST7789V_BLACKLIGHT_PORT, ST7789V_BLACKLIGHT_PIN, ST7789V_BLACKLIGHT_ACTIVE)
-#define ST7789VBlackLightDeactive()          gpio_bit_write(ST7789V_BLACKLIGHT_PORT, ST7789V_BLACKLIGHT_PIN, ~ST7789V_BLACKLIGHT_ACTIVE)
+#define ST7789VBlackLightActive()           gpio_bit_write(ST7789V_BLACKLIGHT_PORT, ST7789V_BLACKLIGHT_PIN, ST7789V_BLACKLIGHT_ACTIVE)
+#define ST7789VBlackLightDeactive()         gpio_bit_write(ST7789V_BLACKLIGHT_PORT, ST7789V_BLACKLIGHT_PIN, ~ST7789V_BLACKLIGHT_ACTIVE)
 
 #define ST7789_SLPOUT       0x11
 #define ST7789_NORON        0x13
@@ -56,7 +56,7 @@
 #define TFT_MAD_ML          0x10
 
 
-u16 BACK_COLOR;   //背景色
+u16 BACK_COLOR = 0;   //背景色
 u16 colstart = 52;
 u16 rowstart = 40;
 u16 _init_height = 240;
@@ -70,13 +70,13 @@ u8 rotation = 0;
       入口数据：dat  要写入的串行数据
       返回值：  无
 ******************************************************************************/
-void ST7789VWriteBus(u8 dat)
+void ST7789VSPISendData(u8 data)
 {
 #if SPI0_CFG == 1
     OLED_CS_Clr();
 
     while (RESET == spi_i2s_flag_get(SPI0, SPI_FLAG_TBE));
-    spi_i2s_data_transmit(SPI0, dat);
+    spi_i2s_data_transmit(SPI0, data);
     while (RESET == spi_i2s_flag_get(SPI0, SPI_FLAG_RBNE));
     spi_i2s_data_receive(SPI0);
 
@@ -88,12 +88,12 @@ void ST7789VWriteBus(u8 dat)
     OLED_CS_Clr();
     for (i = 0; i < 8; i++) {
         OLED_SCLK_Clr();
-        if (dat & 0x80)
+        if (data & 0x80)
             OLED_SDIN_Set();
         else
             OLED_SDIN_Clr();
         OLED_SCLK_Set();
-        dat <<= 1;
+        data <<= 1;
     }
     OLED_CS_Set();
 #endif
@@ -105,10 +105,10 @@ void ST7789VWriteBus(u8 dat)
       入口数据：dat 写入的数据
       返回值：  无
 ******************************************************************************/
-void ST7789VWrite8Bit(u8 dat)
+void ST7789VSPISend8Bit(u8 data)
 {
-    OLED_DC_Set();//写数据
-    ST7789VWriteBus(dat);
+    ST7789VDataMode();
+    ST7789VSPISendData(data);
 }
 
 
@@ -117,11 +117,11 @@ void ST7789VWrite8Bit(u8 dat)
       入口数据：dat 写入的数据
       返回值：  无
 ******************************************************************************/
-void ST7789VWrite16Bit(u16 dat)
+void ST7789VSPISend16Bit(u16 data)
 {
-    OLED_DC_Set();//写数据
-    ST7789VWriteBus(dat >> 8);
-    ST7789VWriteBus(dat);
+    ST7789VDataMode();
+    ST7789VSPISendData(data >> 8);
+    ST7789VSPISendData(data);
 }
 
 
@@ -130,10 +130,10 @@ void ST7789VWrite16Bit(u16 dat)
       入口数据：dat 写入的命令
       返回值：  无
 ******************************************************************************/
-void ST7789VWriteCommand(u8 dat)
+void ST7789VSPISendCommand(u8 command)
 {
-    OLED_DC_Clr();//写命令
-    ST7789VWriteBus(dat);
+    ST7789VCommandMode();
+    ST7789VSPISendData(command);
 }
 
 
@@ -145,13 +145,13 @@ void ST7789VWriteCommand(u8 dat)
 ******************************************************************************/
 void ST7789VAddressSet(u16 x1, u16 y1, u16 x2, u16 y2)
 {
-    ST7789VWriteCommand(0x2a);//列地址设置
-    ST7789VWrite16Bit(x1 + colstart);
-    ST7789VWrite16Bit(x2 + colstart);
-    ST7789VWriteCommand(0x2b);//行地址设置
-    ST7789VWrite16Bit(y1 + rowstart);
-    ST7789VWrite16Bit(y2 + rowstart);
-    ST7789VWriteCommand(0x2c);//储存器写
+    ST7789VSPISendCommand(0x2a);//列地址设置
+    ST7789VSPISend16Bit(x1 + colstart);
+    ST7789VSPISend16Bit(x2 + colstart);
+    ST7789VSPISendCommand(0x2b);//行地址设置
+    ST7789VSPISend16Bit(y1 + rowstart);
+    ST7789VSPISend16Bit(y2 + rowstart);
+    ST7789VSPISendCommand(0x2c);//储存器写
 }
 
 #if SPI0_CFG == 2
@@ -196,7 +196,7 @@ void SPIConfig(void)
 {
     spi_parameter_struct spi_init_struct;
     /* deinitilize SPI and the parameters */
-    OLED_CS_Set();
+    ST7789VChipSelect();
     spi_struct_para_init(&spi_init_struct);
 
     /* SPI0 parameter config */
@@ -269,133 +269,133 @@ void ST7789VInit(void)
 #endif
 
 
-    OLED_RST_Clr();
+    ST7789VResetActive();
     delay(200);
-    OLED_RST_Set();
+    ST7789VResetDeactive();
     delay(20);
-    OLED_BLK_Set();
+    ST7789VBlackLightActive();
 
-    ST7789VWriteCommand(ST7789_SLPOUT);   // Sleep out
+    ST7789VSPISendCommand(ST7789_SLPOUT);   // Sleep out
     delay(120);
 
-    ST7789VWriteCommand(ST7789_NORON);    // Normal display mode on
+    ST7789VSPISendCommand(ST7789_NORON);    // Normal display mode on
 
     //------------------------------display and color format setting--------------------------------//
-    ST7789VWriteCommand(ST7789_MADCTL);
-    //ST7789VWrite8Bit(0x00);
-    ST7789VWrite8Bit(TFT_MAD_RGB);
+    ST7789VSPISendCommand(ST7789_MADCTL);
+    //ST7789VSPISend8Bit(0x00);
+    ST7789VSPISend8Bit(TFT_MAD_RGB);
 
     // JLX240 display datasheet
-    ST7789VWriteCommand(0xB6);
-    ST7789VWrite8Bit(0x0A);
-    ST7789VWrite8Bit(0x82);
+    ST7789VSPISendCommand(0xB6);
+    ST7789VSPISend8Bit(0x0A);
+    ST7789VSPISend8Bit(0x82);
 
-    ST7789VWriteCommand(ST7789_COLMOD);
-    ST7789VWrite8Bit(0x55);
+    ST7789VSPISendCommand(ST7789_COLMOD);
+    ST7789VSPISend8Bit(0x55);
     delay(10);
 
     //--------------------------------ST7789V Frame rate setting----------------------------------//
-    ST7789VWriteCommand(ST7789_PORCTRL);
-    ST7789VWrite8Bit(0x0c);
-    ST7789VWrite8Bit(0x0c);
-    ST7789VWrite8Bit(0x00);
-    ST7789VWrite8Bit(0x33);
-    ST7789VWrite8Bit(0x33);
+    ST7789VSPISendCommand(ST7789_PORCTRL);
+    ST7789VSPISend8Bit(0x0c);
+    ST7789VSPISend8Bit(0x0c);
+    ST7789VSPISend8Bit(0x00);
+    ST7789VSPISend8Bit(0x33);
+    ST7789VSPISend8Bit(0x33);
 
-    ST7789VWriteCommand(ST7789_GCTRL);      // Voltages: VGH / VGL
-    ST7789VWrite8Bit(0x35);
+    ST7789VSPISendCommand(ST7789_GCTRL);      // Voltages: VGH / VGL
+    ST7789VSPISend8Bit(0x35);
 
     //---------------------------------ST7789V Power setting--------------------------------------//
-    ST7789VWriteCommand(ST7789_VCOMS);
-    ST7789VWrite8Bit(0x28);       // JLX240 display datasheet
+    ST7789VSPISendCommand(ST7789_VCOMS);
+    ST7789VSPISend8Bit(0x28);       // JLX240 display datasheet
 
-    ST7789VWriteCommand(ST7789_LCMCTRL);
-    ST7789VWrite8Bit(0x0C);
+    ST7789VSPISendCommand(ST7789_LCMCTRL);
+    ST7789VSPISend8Bit(0x0C);
 
-    ST7789VWriteCommand(ST7789_VDVVRHEN);
-    ST7789VWrite8Bit(0x01);
-    ST7789VWrite8Bit(0xFF);
+    ST7789VSPISendCommand(ST7789_VDVVRHEN);
+    ST7789VSPISend8Bit(0x01);
+    ST7789VSPISend8Bit(0xFF);
 
-    ST7789VWriteCommand(ST7789_VRHS);       // voltage VRHS
-    ST7789VWrite8Bit(0x10);
+    ST7789VSPISendCommand(ST7789_VRHS);       // voltage VRHS
+    ST7789VSPISend8Bit(0x10);
 
-    ST7789VWriteCommand(ST7789_VDVSET);
-    ST7789VWrite8Bit(0x20);
+    ST7789VSPISendCommand(ST7789_VDVSET);
+    ST7789VSPISend8Bit(0x20);
 
-    ST7789VWriteCommand(ST7789_FRCTR2);
-    ST7789VWrite8Bit(0x0f);
+    ST7789VSPISendCommand(ST7789_FRCTR2);
+    ST7789VSPISend8Bit(0x0f);
 
-    ST7789VWriteCommand(ST7789_PWCTRL1);
-    ST7789VWrite8Bit(0xa4);
-    ST7789VWrite8Bit(0xa1);
+    ST7789VSPISendCommand(ST7789_PWCTRL1);
+    ST7789VSPISend8Bit(0xa4);
+    ST7789VSPISend8Bit(0xa1);
 
     //--------------------------------ST7789V gamma setting---------------------------------------//
-    ST7789VWriteCommand(ST7789_PVGAMCTRL);
-    ST7789VWrite8Bit(0xd0);
-    ST7789VWrite8Bit(0x00);
-    ST7789VWrite8Bit(0x02);
-    ST7789VWrite8Bit(0x07);
-    ST7789VWrite8Bit(0x0a);
-    ST7789VWrite8Bit(0x28);
-    ST7789VWrite8Bit(0x32);
-    ST7789VWrite8Bit(0x44);
-    ST7789VWrite8Bit(0x42);
-    ST7789VWrite8Bit(0x06);
-    ST7789VWrite8Bit(0x0e);
-    ST7789VWrite8Bit(0x12);
-    ST7789VWrite8Bit(0x14);
-    ST7789VWrite8Bit(0x17);
+    ST7789VSPISendCommand(ST7789_PVGAMCTRL);
+    ST7789VSPISend8Bit(0xd0);
+    ST7789VSPISend8Bit(0x00);
+    ST7789VSPISend8Bit(0x02);
+    ST7789VSPISend8Bit(0x07);
+    ST7789VSPISend8Bit(0x0a);
+    ST7789VSPISend8Bit(0x28);
+    ST7789VSPISend8Bit(0x32);
+    ST7789VSPISend8Bit(0x44);
+    ST7789VSPISend8Bit(0x42);
+    ST7789VSPISend8Bit(0x06);
+    ST7789VSPISend8Bit(0x0e);
+    ST7789VSPISend8Bit(0x12);
+    ST7789VSPISend8Bit(0x14);
+    ST7789VSPISend8Bit(0x17);
 
-    ST7789VWriteCommand(ST7789_NVGAMCTRL);
-    ST7789VWrite8Bit(0xd0);
-    ST7789VWrite8Bit(0x00);
-    ST7789VWrite8Bit(0x02);
-    ST7789VWrite8Bit(0x07);
-    ST7789VWrite8Bit(0x0a);
-    ST7789VWrite8Bit(0x28);
-    ST7789VWrite8Bit(0x31);
-    ST7789VWrite8Bit(0x54);
-    ST7789VWrite8Bit(0x47);
-    ST7789VWrite8Bit(0x0e);
-    ST7789VWrite8Bit(0x1c);
-    ST7789VWrite8Bit(0x17);
-    ST7789VWrite8Bit(0x1b);
-    ST7789VWrite8Bit(0x1e);
+    ST7789VSPISendCommand(ST7789_NVGAMCTRL);
+    ST7789VSPISend8Bit(0xd0);
+    ST7789VSPISend8Bit(0x00);
+    ST7789VSPISend8Bit(0x02);
+    ST7789VSPISend8Bit(0x07);
+    ST7789VSPISend8Bit(0x0a);
+    ST7789VSPISend8Bit(0x28);
+    ST7789VSPISend8Bit(0x31);
+    ST7789VSPISend8Bit(0x54);
+    ST7789VSPISend8Bit(0x47);
+    ST7789VSPISend8Bit(0x0e);
+    ST7789VSPISend8Bit(0x1c);
+    ST7789VSPISend8Bit(0x17);
+    ST7789VSPISend8Bit(0x1b);
+    ST7789VSPISend8Bit(0x1e);
 
-    ST7789VWriteCommand(ST7789_INVON);
+    ST7789VSPISendCommand(ST7789_INVON);
 
-    ST7789VWriteCommand(ST7789_CASET);    // Column address set
-    ST7789VWrite8Bit(0x00);
-    ST7789VWrite8Bit(0x00);
-    ST7789VWrite8Bit(0x00);
-    ST7789VWrite8Bit(0xE5);    // 239
+    ST7789VSPISendCommand(ST7789_CASET);    // Column address set
+    ST7789VSPISend8Bit(0x00);
+    ST7789VSPISend8Bit(0x00);
+    ST7789VSPISend8Bit(0x00);
+    ST7789VSPISend8Bit(0xE5);    // 239
 
-    ST7789VWriteCommand(ST7789_RASET);    // Row address set
-    ST7789VWrite8Bit(0x00);
-    ST7789VWrite8Bit(0x00);
-    ST7789VWrite8Bit(0x01);
-    ST7789VWrite8Bit(0x3F);    // 319
+    ST7789VSPISendCommand(ST7789_RASET);    // Row address set
+    ST7789VSPISend8Bit(0x00);
+    ST7789VSPISend8Bit(0x00);
+    ST7789VSPISend8Bit(0x01);
+    ST7789VSPISend8Bit(0x3F);    // 319
 
 
     delay(120);
 
     ST7789VSetRotation(0);
 
-    ST7789VWriteCommand(ST7789_DISPON);    //Display on
+    ST7789VSPISendCommand(ST7789_DISPON);    //Display on
     delay(120);
 }
 
 void ST7789VSetRotation(uint8_t m)
 {
     rotation = m % 4;
-    ST7789VWriteCommand(0x36);
+    ST7789VSPISendCommand(0x36);
     switch (rotation) {
     case 0:
         colstart = 52;
         rowstart = 40;
         _width  = _init_width;
         _height = _init_height;
-        ST7789VWrite8Bit(TFT_MAD_COLOR_ORDER);
+        ST7789VSPISend8Bit(TFT_MAD_COLOR_ORDER);
         break;
 
     case 1:
@@ -403,21 +403,21 @@ void ST7789VSetRotation(uint8_t m)
         rowstart = 53;
         _width  = _init_height;
         _height = _init_width;
-        ST7789VWrite8Bit(TFT_MAD_MX | TFT_MAD_MV | TFT_MAD_COLOR_ORDER);
+        ST7789VSPISend8Bit(TFT_MAD_MX | TFT_MAD_MV | TFT_MAD_COLOR_ORDER);
         break;
     case 2:
         colstart = 52;
         rowstart = 40;
         _width  = _init_width;
         _height = _init_height;
-        ST7789VWrite8Bit(TFT_MAD_MX | TFT_MAD_MY | TFT_MAD_COLOR_ORDER);
+        ST7789VSPISend8Bit(TFT_MAD_MX | TFT_MAD_MY | TFT_MAD_COLOR_ORDER);
         break;
     case 3:
         colstart = 40;
         rowstart = 52;
         _width  = _init_height;
         _height = _init_width;
-        ST7789VWrite8Bit(TFT_MAD_MV | TFT_MAD_MY | TFT_MAD_COLOR_ORDER);
+        ST7789VSPISend8Bit(TFT_MAD_MV | TFT_MAD_MY | TFT_MAD_COLOR_ORDER);
         break;
     }
 }
@@ -438,11 +438,15 @@ void ST7789VClear(u16 Color)
     ST7789VAddressSet(0, 0, _width - 1, _height - 1);
     for (i = 0; i < _width; i++) {
         for (j = 0; j < _height; j++) {
-            ST7789VWrite16Bit(Color);
+            ST7789VSPISend16Bit(Color);
         }
     }
 }
 
+void ST7789VSetBackgroundColor(u16 color)
+{
+    BACK_COLOR = color;
+}
 
 /******************************************************************************
       函数说明：LCD显示汉字
@@ -467,9 +471,9 @@ void ST7789VShowChinese(u16 x, u16 y, u8 index, u8 size, u16 color)
     for (j = 0; j < size1; j++) {
         for (i = 0; i < 8; i++) {
             if ((*temp & (1 << i)) != 0) { //从数据的低位开始读
-                ST7789VWrite16Bit(color);//点亮
+                ST7789VSPISend16Bit(color);//点亮
             } else {
-                ST7789VWrite16Bit(BACK_COLOR);//不点亮
+                ST7789VSPISend16Bit(BACK_COLOR);//不点亮
             }
         }
         temp++;
@@ -485,7 +489,7 @@ void ST7789VShowChinese(u16 x, u16 y, u8 index, u8 size, u16 color)
 void ST7789VDrawPoint(u16 x, u16 y, u16 color)
 {
     ST7789VAddressSet(x, y, x, y); //设置光标位置
-    ST7789VWrite16Bit(color);
+    ST7789VSPISend16Bit(color);
 }
 
 
@@ -511,7 +515,7 @@ void ST7789VFill(u16 xsta, u16 ysta, u16 xend, u16 yend, u16 color)
     u16 i, j;
     ST7789VAddressSet(xsta, ysta, xend, yend);   //设置光标位置
     for (i = ysta; i <= yend; i++) {
-        for (j = xsta; j <= xend; j++)ST7789VWrite16Bit(color); //设置光标位置
+        for (j = xsta; j <= xend; j++)ST7789VSPISend16Bit(color); //设置光标位置
     }
 }
 
@@ -623,8 +627,8 @@ void ST7789VShowChar(u16 x, u16 y, u8 num, u8 mode, u16 color)
         for (pos = 0; pos < 16; pos++) {
             temp = asc2_1608[(u16)num * 16 + pos];   //调用1608字体
             for (t = 0; t < 8; t++) {
-                if (temp & 0x01)ST7789VWrite16Bit(color);
-                else ST7789VWrite16Bit(BACK_COLOR);
+                if (temp & 0x01)ST7789VSPISend16Bit(color);
+                else ST7789VSPISend16Bit(BACK_COLOR);
                 temp >>= 1;
                 x++;
             }
@@ -740,6 +744,6 @@ void ST7789VShowPicture(u16 x1, u16 y1, u16 x2, u16 y2)
     int i;
     ST7789VAddressSet(x1, y1, x2, y2);
     for (i = 0; i < 12800; i++) {
-        ST7789VWrite8Bit(image[i]);
+        ST7789VSPISend8Bit(image[i]);
     }
 }

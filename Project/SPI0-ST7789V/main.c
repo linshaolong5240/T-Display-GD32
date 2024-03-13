@@ -59,7 +59,7 @@ int main(void)
     printf("ST7789VInit\r\n");
     ST7789VClear(BLACK);
     printf("ST7789VClear\r\n");
-    BACK_COLOR = BLACK;
+    ST7789VSetBackgroundColor(YELLOW);
     ST7789VSetRotation(1);
     ST7789VShowString(0, 0, "Sauron Pi", RED);
     ST7789VShowString(0, 16, "Sauron Pi", GREEN);
